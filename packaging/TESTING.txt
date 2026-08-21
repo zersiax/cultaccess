@@ -40,16 +40,19 @@ KEYS
   F8   read the open panel
   F9   which speech backend is in use
   F10  stop speech
+  F5   while placing a building, says which way the nearest cell is that the
+       structure will actually fit in
   F11  repeat the last thing said
   F12  where am I: health, fervour, tarot, day and time, current objective
 
-  [  ]  previous / next nearby target
-  \     rescan surroundings
-  /     change target filter
-  ;     start or stop walking guidance
-  '     repeat the current direction
-  .     nearby enemies
-  ,     point the beacon at an enemy
+  [(left bracket) ] and  (right bracket), or page-up and page-down:  previous / next nearby target
+
+  \ (backslash)     rescan surroundings
+  / (slash) and ? (shift+slash) (or ctrl+page-up and ctrl+page-down)     change target filter
+  ; (semicolon) (or home)     start or stop walking guidance
+  ' (quote)     repeat the current direction
+  . (period)     nearby enemies
+  , (comma)     point the beacon at an enemy
 
 
 WHAT IS UNCONFIRMED AND WORTH TRYING
@@ -72,7 +75,7 @@ WHAT IS UNCONFIRMED AND WORTH TRYING
 
   4. Re-educating a dissenter. Each session should say how much dissent is left
      and roughly how many more daily sessions it needs. It is a seven-day course
-     on ONE follower - spreading sessions across several cures nobody.
+     on ONE follower.
 
   5. A story moment. If the target list goes empty, it should say a story moment
      is in progress and repeat what the game wants, rather than just going quiet.

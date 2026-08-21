@@ -90,7 +90,9 @@ foreach ($doc in @('LICENSE', 'THIRD_PARTY_NOTICES.md')) {
     Copy-Item $path -Destination $stage -Force
 }
 
-foreach ($doc in @('CHANGELOG.md', 'README.md')) {
+# changelog_for_hoomans.md is the one a player reads. CHANGELOG.md is the full
+# Keep a Changelog record and ships alongside it for anyone who wants the detail.
+foreach ($doc in @('changelog_for_hoomans.md', 'CHANGELOG.md', 'README.md')) {
     $path = Join-Path $root $doc
     if (Test-Path $path) { Copy-Item $path -Destination $stage -Force }
     else { Write-Host "Note: $doc not found, packaging without it." }

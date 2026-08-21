@@ -70,12 +70,12 @@ documents and lists, and it sits in the same physical place on every keyboard la
 - **`\`** — re-scan surroundings
 
 The same commands are also on a punctuation cluster, which may suit you better if your hands
-are already there:
+are already there. This is particularly useful in combat:
 
-- **`[`** / **`]`** — previous / next nearby target
-- **`/`** / **Shift+`/`** — cycle the target filter forward / backward
-- **`;`** — start or stop walking guidance
-- **`'`** — speak the current walking direction
+- **`[` (left bracket)** / **`]` (right bracket)** — previous / next nearby target
+- **`/` (slash)** / **Shift+`/` (shift+slash)** — cycle the target filter forward / backward
+- **`; (semicolon)`** — start or stop walking guidance
+- **`' (quote)`** — speak the current walking direction
 
 **A caveat on the punctuation keys.** They are bound by the character they type, not by where
 they sit. On a QWERTZ or AZERTY keyboard the key that produces a semicolon is somewhere else
@@ -85,8 +85,8 @@ are rebindable in config.
 
 Combat:
 
-- **`.`** - list nearby enemies with distance and direction
-- **`,`** - point the audio beacon at the next enemy; cycle beyond the last to turn it off
+- **`. (period)`** - list nearby enemies with distance and direction
+- **`, (comma)`** - point the audio beacon at the next enemy; cycle beyond the last to turn it off
 
 Inside the settings menu only:
 
@@ -109,6 +109,7 @@ Every mod hotkey above avoids all of them. Worth noting what that ruled out: `E`
 the input map), `R` (Interact 2) and `T` (Interact 3 and active Fleece Ability) are all taken,
 so the obvious letter choices for a navigation cluster would each have stolen a gameplay key.
 Re-run the dump after any game update, since bindings can change.
+(note to hoomans: you can probably safely stop reading here)
 
 ## Directions
 
