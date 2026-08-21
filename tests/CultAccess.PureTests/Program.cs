@@ -97,6 +97,27 @@ internal static class Program
             "<sprite name=\"icon_Nothing\">",
             "Nothing");
 
+        // The game reuses one sprite for more than one item: icon_wood is claimed by both LOG
+        // and FORGE_FLAME. Registering in enum order let the second overwrite the first, and
+        // lumber costs were read out as "Sacred Flame".
+        RichText.RegisterSpriteWord("icon_wood", "Sacred Flame");
+        AssertClean(
+            "the game's table must not overwrite a confirmed baseline word",
+            "<sprite name=\"icon_wood\">",
+            "Lumber");
+
+        // Between two entries from the game's own table there is no confirmed word, so the
+        // first is kept rather than the last silently winning.
+        RichText.RegisterSpriteWord("icon_Mushroom", "Small Mushroom");
+        RichText.RegisterSpriteWord("icon_Mushroom", "Big Mushroom");
+        AssertClean(
+            "a second claim on the same sprite is refused, not applied",
+            "<sprite name=\"icon_Mushroom\">",
+            "Small Mushroom");
+        Assert(
+            RichText.CollisionCount >= 2,
+            "refused registrations must be counted so a clash can be seen in the log");
+
         RichText.ResetSpriteWords();
         AssertClean(
             "resetting restores the baseline and drops registrations",

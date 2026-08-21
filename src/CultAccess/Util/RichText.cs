@@ -127,14 +127,53 @@ namespace CultAccess.Util
             var clean = Clean(word);
             if (clean.Length == 0) return;
 
+            // The baseline is not overwritten. The game reuses one sprite for more than one
+            // item — icon_wood is claimed by both LOG and FORGE_FLAME — and registering in
+            // enum order let the second silently replace the first, so lumber costs read as
+            // "Sacred Flame". These six were each confirmed against live UI text, which is
+            // exactly the evidence the game's table cannot supply for an ambiguous icon.
+            if (DefaultSpriteWords.TryGetValue(spriteName, out var baseline))
+            {
+                // Counted like any other refusal. This is the case that produced the defect,
+                // so it is the one most worth being visible in the log.
+                if (baseline != clean)
+                {
+                    LastCollision = $"{spriteName}: kept baseline \"{baseline}\", ignored \"{clean}\"";
+                    CollisionCount++;
+                }
+
+                return;
+            }
+
+            // Between two entries from the game's own table there is no such evidence, so the
+            // first is kept and the clash is reported rather than resolved silently.
+            if (SpriteWords.TryGetValue(spriteName, out var existing))
+            {
+                if (existing != clean)
+                {
+                    LastCollision = $"{spriteName}: kept \"{existing}\", ignored \"{clean}\"";
+                    CollisionCount++;
+                }
+
+                return;
+            }
+
             SpriteWords[spriteName] = clean;
         }
+
+        /// <summary>How many registrations were refused because the sprite was already claimed.</summary>
+        public static int CollisionCount { get; private set; }
+
+        /// <summary>The most recent clash, for the diagnostic that reports the build.</summary>
+        public static string LastCollision { get; private set; }
 
         /// <summary>Drop every registered mapping and return to the baseline.</summary>
         public static void ResetSpriteWords()
         {
             SpriteWords.Clear();
             foreach (var pair in DefaultSpriteWords) SpriteWords[pair.Key] = pair.Value;
+            CollisionCount = 0;
+            LastCollision = null;
         }
 
         /// <summary>How many sprites the cleaner currently knows. Diagnostic only.</summary>

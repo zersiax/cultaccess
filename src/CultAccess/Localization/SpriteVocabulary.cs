@@ -72,7 +72,9 @@ namespace CultAccess.Localization
             Plugin.Log.LogInfo(
                 $"[sprite vocabulary] built from the game's icon table: {registered} sprite(s) " +
                 $"named across {items} item type(s), {unnamed} without a usable name; " +
-                $"{RichText.SpriteWordCount} known in total");
+                $"{RichText.SpriteWordCount} known in total, " +
+                $"{RichText.CollisionCount} refused as already claimed" +
+                (RichText.LastCollision == null ? "" : $" (last: {RichText.LastCollision})"));
         }
 
         private static string SafeIcon(InventoryItem.ITEM_TYPE type, bool white)

@@ -13,6 +13,16 @@ Game version tested against throughout: **Cult of the Lamb 1.5.25.1049** (Steam)
 
 ## [0.1.0] — 2026-08-21
 
+### Fixed
+
+- Lumber read out as "Sacred Flame" — a repaired sleeping bag reported costing it, and a
+  lumberyard reported generating it. The icon vocabulary is built from the game's own table,
+  and the game reuses one sprite for more than one item: `icon_wood` is claimed by both `LOG`
+  and `FORGE_FLAME`. Registering in enum order let the second silently overwrite the first.
+  A confirmed word is no longer replaced, a second claim on any sprite is refused rather than
+  applied, and refused claims are counted and named in the startup log so a clash cannot hide
+  again. `icon_Mushroom`, shared by the small and big mushrooms, was the same defect unnoticed.
+
 ### Added
 
 **Speech and framework**
