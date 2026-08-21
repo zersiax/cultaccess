@@ -3,15 +3,15 @@
 All notable changes to CultAccess. Format follows Keep a Changelog; versioning is semantic
 against the mod's own features.
 
-**Nothing has been released yet.** The mod has never been published to Thunderstore or
-anywhere else, and no GitHub release exists. Everything below is development history under
-`0.1.0`, reconstructed from the project's development log.
+**0.1.0 is the first release, and it is a test build.** It has not been published to
+Thunderstore; it is a GitHub release aimed at testers. Parts of it have never been confirmed
+by anyone but the author — `TESTING.txt` in the download lists which, and what to send back.
 
 Game version tested against throughout: **Cult of the Lamb 1.5.25.1049** (Steam).
 
 ---
 
-## [Unreleased] — 0.1.0
+## [0.1.0] — 2026-08-21
 
 ### Added
 
