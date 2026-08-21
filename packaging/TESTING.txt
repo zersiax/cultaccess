@@ -1,0 +1,109 @@
+CultAccess - what to test and what to send back
+===============================================
+
+Thank you for testing. This build has a lot that works and a short list of things
+that have never been confirmed by anyone except the author, so your report is the
+only way some of it gets verified.
+
+
+THE MOST USEFUL THING YOU CAN DO
+--------------------------------
+
+Press F7 whenever something happens that the mod did NOT tell you about.
+
+That writes a numbered marker into the log with your position, the game's current
+location and what the game is waiting for. You will hear "Log marker 1", "Log
+marker 2" and so on. Afterwards just say "marker 3 was the animation I could not
+identify" and the exact moment can be found.
+
+This one key has already turned two "I have no idea what happened" reports into
+precise diagnoses. Use it freely; it costs nothing.
+
+
+THE LOG
+-------
+
+Everything the mod sees is written here:
+
+    <game folder>\BepInEx\LogOutput.log
+
+It is overwritten each time the game starts, so copy it out BEFORE relaunching if
+something interesting happened. Sending the whole file is fine and preferred - it
+is plain text and there is no need to trim it.
+
+
+KEYS
+----
+
+  F1   help, one section per press. Start here; it lists everything.
+  F7   mark the log (see above)
+  F8   read the open panel
+  F9   which speech backend is in use
+  F10  stop speech
+  F11  repeat the last thing said
+  F12  where am I: health, fervour, tarot, day and time, current objective
+
+  [  ]  previous / next nearby target
+  \     rescan surroundings
+  /     change target filter
+  ;     start or stop walking guidance
+  '     repeat the current direction
+  .     nearby enemies
+  ,     point the beacon at an enemy
+
+
+WHAT IS UNCONFIRMED AND WORTH TRYING
+------------------------------------
+
+  1. Indoctrinating a new follower. Walk the whole flow: the name field, then
+     Form, Variant and Colour, then the traits. Every tile should name what it
+     is - a form should give its name, whether it is locked, and which biome it
+     comes from; a trait should give its name and what it does. These read as
+     the bare word "button" until very recently, so this is the newest and least
+     proven part of the mod.
+
+  2. The Crown window, reached from the Temple Altar. Each upgrade and fleece
+     should give its name, whether you own it, whether you can afford it, its
+     cost against what you hold, and its description.
+
+  3. Preaching a sermon. At the end you should hear which doctrine it fed, how
+     much was gained, the progress toward the next upgrade, and how many
+     followers attended.
+
+  4. Re-educating a dissenter. Each session should say how much dissent is left
+     and roughly how many more daily sessions it needs. It is a seven-day course
+     on ONE follower - spreading sessions across several cures nobody.
+
+  5. A story moment. If the target list goes empty, it should say a story moment
+     is in progress and repeat what the game wants, rather than just going quiet.
+
+  6. Non-English. If you play in another language, everything the mod says should
+     be in that language. All translations are machine drafts - please flag
+     anything a native speaker would object to, especially where the mod's word
+     for Shrine, Devotion or Sermon differs from the game's own word.
+
+  7. Twitch, only if you stream. Connect from the pause menu, not the main menu -
+     the connection belongs to the save file. During a Help or Hinder vote the
+     mod should say chat is voting and that the base gate is held shut, then say
+     what chat chose.
+
+
+WHAT TO INCLUDE IN A REPORT
+---------------------------
+
+  - What you did, roughly.
+  - What you heard, and what you expected instead.
+  - The marker number if you pressed F7.
+  - LogOutput.log.
+
+"It said nothing when I did X" is a completely valid and useful report. Silence is
+a bug in this kind of mod, and it is the hardest kind to find without you.
+
+
+KNOWN ROUGH EDGES
+-----------------
+
+  - Some announcements are still English regardless of your game language. The
+    translation migration is partial and known to be so.
+  - Controller is not supported. Keyboard only.
+  - Auto Cook and the Tailor minigame have never been tested by anyone.

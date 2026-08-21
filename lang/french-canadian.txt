@@ -1,0 +1,178 @@
+# CultAccess string catalogue - French (Canadian)
+#
+# STATUS: machine-draft. Translated by the mod's author tooling, NOT yet reviewed by a
+# native speaker. Corrections are welcome and require no rebuild: edit a value below,
+# or delete a line entirely to fall back to English.
+#
+# Known risk in this draft: a few lines name things the game itself also names, such as
+# the Shrine, Devotion and the Sermon. This file guesses those words. If the game uses a
+# different word in French (Canadian), change it here so the mod matches the rest of the interface.
+#
+#
+# COVERAGE: this draft translates the spoken interface - menu entries, cue names, values
+# and short sentences. The longer explanations that the help key reads out are not
+# translated yet and fall back to English, which is by design rather than an oversight:
+# a partial catalogue is a working catalogue. Adding them needs no rebuild.
+#
+# Keep the {0}, {1} placeholders. Reorder them freely to suit this language.
+# Lines starting with # are comments. Use 
+ for a line break inside a value.
+
+_meta.status = machine-draft
+_meta.translator =
+
+
+# EN: Next step, indoctrinate your new follower
+onboarding.indoctrinate = Étape suivante, endoctrinez votre nouvel adepte
+
+# EN: Next step, go to the indoctrination platform and indoctrinate your new follower
+onboarding.indoctrinate_at_platform = Étape suivante, rendez-vous sur la plateforme d'endoctrinement et endoctrinez votre nouvel adepte
+
+# EN: Next step, build a Shrine
+onboarding.shrine = Étape suivante, construisez un sanctuaire
+
+# EN: Next step, command a follower to worship at the Shrine, then collect Devotion
+onboarding.devotion = Étape suivante, ordonnez à un adepte de prier au sanctuaire, puis récoltez la dévotion
+
+# EN: Next step, {0}
+onboarding.unknown = Étape suivante, {0}
+
+# EN: Day {0}.
+day.new = Jour {0}.
+
+# EN: Day {0}. {1} available.
+day.new_with_restored = Jour {0}. {1} disponible.
+
+# EN: Night falls.
+day.nightfall = La nuit tombe.
+
+# EN: Day {0}, {1}
+day.status = Jour {0}, {1}
+
+# EN: Day {0}, {1}, about {2} until {3}
+day.status_with_countdown = Jour {0}, {1}, environ {2} avant {3}
+
+# EN: {0} second
+duration.second = {0} seconde
+
+# EN: {0} seconds
+duration.seconds = {0} secondes
+
+# EN: {0}, entrance, walk in without pressing Interact
+entrance.open = {0}, entrée, entrez sans appuyer sur Interagir
+
+# EN: {0}, entrance, blocked
+entrance.blocked = {0}, entrée, bloquée
+
+# EN: At {0}. Walk into the doorway to go inside.
+entrance.arrival_open = Devant {0}. Franchissez la porte pour entrer.
+
+# EN: Reached {0}. The doorway is blocked.
+entrance.arrival_blocked = {0} atteint. La porte est bloquée.
+
+# EN: requires {0} follower; you have {1}
+dungeon_door.requirement_one = nécessite {0} adepte ; vous en avez {1}
+
+# EN: requires {0} followers; you have {1}
+dungeon_door.requirement_many = nécessite {0} adeptes ; vous en avez {1}
+
+
+# Settings menu, sound cues and the spoken values they use.
+# This draft matches the France French one: for interface text of this kind the two differ very little. Corrections specific to Canadian French are welcome.
+config.title = Paramètres de CultAccess
+config.item = élément
+config.submenu = sous-menu
+config.on = activé
+config.off = désactivé
+config.percent = {0} pour cent
+config.metres = {0} mètres
+config.seconds = {0} secondes
+config.per_second = {0} par seconde
+config.page_empty = {0}. Rien à modifier ici.
+config.page_items_one = 1 élément
+config.page_items_many = {0} éléments
+config.closed = Paramètres fermés.
+config.nothing_to_do = Rien à faire sur cet élément.
+config.no_detail = Aucune explication supplémentaire pour cet élément.
+config.currently_silent = actuellement muet, car un interrupteur au-dessus est désactivé
+config.controls = Haut et bas déplacent la sélection. Gauche et droite modifient une valeur. Entrée ouvre une section ou lance une action. Retour arrière revient en arrière, et ferme le menu depuis le niveau supérieur. {0} le ferme depuis n'importe où. Le jeu continue de tourner, alors ouvre ceci quand tu es en sécurité.
+config.speech = Parole
+config.sounds = Sons
+config.wayfinding = Guidage
+config.learn_sounds = Apprendre les sons
+config.speech_enabled = Parole
+config.verbosity = Niveau de détail
+config.verbosity_low = faible
+config.menu_context = Noms des menus
+config.auto_read_panels = Lire les panneaux automatiquement
+config.interaction_prompts = Invites d'interaction
+config.barks = Répliques des adeptes
+config.player_state = Santé et ferveur
+config.day_cycle = Jour et nuit
+config.chore_progress = Niveaux de corvées
+config.onboarding = Prochaine étape du tutoriel
+config.combat_state = Début du combat et salle nettoyée
+config.all_sounds = Tous les sons
+config.overall_volume = Volume général
+config.combat_cues = Sons de combat
+config.always_on = Sons permanents
+config.minigame_cues = Sons des mini-jeux
+config.wayfinding_cues = Balise
+config.all_combat_cues = Tous les sons de combat
+config.all_always_on = Tous les sons permanents
+config.all_minigame_cues = Tous les sons des mini-jeux
+config.all_wayfinding_cues = Balise activée
+config.ambient_budget = Sons maximum par seconde
+config.cue_on = Activé
+config.cue_range = Portée
+config.cue_repeat = Répétition
+config.cue_max_at_once = Maximum simultané
+config.play_it = Écouter
+config.hear_it_move = Écouter le déplacement
+config.guidance_mode = Guidage
+config.mode_beacon_and_speech = balise et parole
+config.mode_beacon_only = balise seule
+config.mode_speech_only = parole seule
+config.beacon_cues = Son de la balise
+config.announce_interval = Répéter le guidage toutes les
+config.scan_radius = Portée du scanner
+config.enemy_range = Portée des ennemis
+config.projectile_horizon = Anticipation de l'alerte de projectile
+config.cooking_lead = Anticipation du son de cuisine
+config.log_navigation = Journaliser la navigation
+config.log_combat = Journaliser le combat
+config.log_dialogue = Journaliser les dialogues
+config.log_scan = Journaliser les candidats au scan
+config.log_bindings = Journaliser les touches du jeu
+cue.beacon = Balise
+cue.wall_near = Mur devant
+cue.wall_blocked = Contact avec un mur
+cue.dodge_direction = Direction de l'esquive
+cue.dodge_blocked = Esquive contre un mur
+cue.melee_threat = Attaque de mêlée en préparation
+cue.projectile_threat = Tir entrant
+cue.area_threat = Zone dangereuse
+cue.static_trap = Piège fixe
+cue.dodge_avoided_hit = L'esquive a évité un coup
+cue.timing_window = Fenêtre de timing ouverte
+cue.timing_chirp = Bord de la fenêtre
+cue.ambient_wall = Sons des murs
+cue.ambient_item = Objets
+cue.ambient_interactable = Objets utilisables
+cue.ambient_npc = Personnages
+cue.ambient_enemy = Ennemis
+cue.ambient_projectile = Projectiles en vol
+config.cue_update = Fréquence de mise à jour
+config.sound_folder = Où placer tes propres sons
+config.sound_folder_is = Place tes fichiers son dans {0}. Nomme chaque fichier d'après le son qu'il remplace, avec l'extension .wav, .ogg ou .mp3. Apprendre les sons indique le nom de fichier du son sélectionné.
+config.sound_file_name = Nom du fichier de remplacement : {0}
+config.wall_notes = Notes des murs
+config.wall_notes_all = toutes les notes
+config.wall_notes_one = une note
+config.wall_notes_two = deux notes
+config.wall_notes_hrtf = trois notes
+config.melee_reaction = Anticipation du son de mêlée
+config.wall_ring = Directions des murs
+config.wall_ring_four = quatre, sans diagonales
+config.wall_ring_eight = huit, avec diagonales
+config.log_frame_budget = Journaliser les temps d'image

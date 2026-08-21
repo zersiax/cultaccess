@@ -1,0 +1,183 @@
+# CultAccess string catalogue - Korean
+#
+# STATUS: machine-draft. Translated by the mod's author tooling, NOT yet reviewed by a
+# native speaker. Corrections are welcome and require no rebuild: edit a value below,
+# or delete a line entirely to fall back to English.
+#
+# Known risk in this draft: a few lines name things the game itself also names, such as
+# the Shrine, Devotion and the Sermon. This file guesses those words. If the game uses a
+# different word in Korean, change it here so the mod matches the rest of the interface.
+#
+#
+# COVERAGE: this draft translates the spoken interface - menu entries, cue names, values
+# and short sentences. The longer explanations that the help key reads out are not
+# translated yet and fall back to English, which is by design rather than an oversight:
+# a partial catalogue is a working catalogue. Adding them needs no rebuild.
+#
+# Keep the {0}, {1} placeholders. Reorder them freely to suit this language.
+# Lines starting with # are comments. Use 
+ for a line break inside a value.
+
+_meta.status = machine-draft
+_meta.translator =
+
+
+# EN: Next step, indoctrinate your new follower
+onboarding.indoctrinate = 다음 단계, 새 추종자를 입교시키세요
+
+# EN: Next step, go to the indoctrination platform and indoctrinate your new follower
+onboarding.indoctrinate_at_platform = 다음 단계, 입교대로 가서 새 추종자를 입교시키세요
+
+# EN: Next step, build a Shrine
+onboarding.shrine = 다음 단계, 제단을 건설하세요
+
+# EN: Next step, command a follower to worship at the Shrine, then collect Devotion
+onboarding.devotion = 다음 단계, 추종자에게 제단에서 기도하라고 명령한 뒤 신앙심을 모으세요
+
+# EN: Next step, {0}
+onboarding.unknown = 다음 단계, {0}
+
+# EN: Day {0}.
+day.new = {0}일차.
+
+# EN: Day {0}. {1} available.
+day.new_with_restored = {0}일차. {1} 사용 가능.
+
+# EN: Night falls.
+day.nightfall = 밤이 찾아옵니다.
+
+# EN: Day {0}, {1}
+day.status = {0}일차, {1}
+
+# EN: Day {0}, {1}, about {2} until {3}
+day.status_with_countdown = {0}일차, {1}, {3}까지 약 {2}
+
+# EN: {0} second
+duration.second = {0}초
+
+# EN: {0} seconds
+duration.seconds = {0}초
+
+# EN: {0}, entrance, walk in without pressing Interact
+entrance.open = {0}, 입구, 상호작용을 누르지 않고 걸어 들어가세요
+
+# EN: {0}, entrance, blocked
+entrance.blocked = {0}, 입구, 막힘
+
+# EN: At {0}. Walk into the doorway to go inside.
+entrance.arrival_open = {0}에 도착. 출입구를 지나 안으로 들어가세요.
+
+# EN: Reached {0}. The doorway is blocked.
+entrance.arrival_blocked = {0}에 도착. 출입구가 막혀 있습니다.
+
+# EN: requires {0} follower; you have {1}
+dungeon_door.requirement_one = 추종자 {0}명 필요; 현재 {1}명
+
+# EN: requires {0} followers; you have {1}
+dungeon_door.requirement_many = 추종자 {0}명 필요; 현재 {1}명
+
+
+# Settings menu, sound cues and the spoken values they use.
+config.title = CultAccess 설정
+config.item = 항목
+config.submenu = 하위 메뉴
+config.on = 켜짐
+config.off = 꺼짐
+config.percent = {0} 퍼센트
+config.metres = {0} 미터
+config.seconds = {0} 초
+config.per_second = 초당 {0}
+config.page_empty = {0}. 여기에는 변경할 것이 없습니다.
+config.page_items_one = 항목 1개
+config.page_items_many = 항목 {0}개
+config.closed = 설정을 닫았습니다.
+config.nothing_to_do = 이 항목에서 할 수 있는 것이 없습니다.
+config.no_detail = 이 항목에 대한 추가 설명이 없습니다.
+config.currently_silent = 위쪽 스위치가 꺼져 있어 지금은 소리가 나지 않습니다
+config.controls = 위아래로 선택을 옮깁니다. 왼쪽과 오른쪽으로 값을 바꿉니다. Enter로 항목을 열거나 동작을 실행합니다. Backspace로 뒤로 가고, 맨 위에서는 메뉴를 닫습니다. {0} 키는 어디서든 닫습니다. 게임은 계속 진행되므로 안전할 때 여세요.
+config.speech = 음성
+config.sounds = 소리
+config.wayfinding = 길 안내
+config.learn_sounds = 소리 익히기
+config.diagnostics = 진단
+config.speech_enabled = 음성
+config.verbosity = 상세 수준
+config.verbosity_low = 낮음
+config.verbosity_normal = 보통
+config.verbosity_diagnostic = 진단
+config.braille = 점자
+config.menu_context = 메뉴 이름
+config.auto_read_panels = 패널 자동 읽기
+config.interaction_prompts = 상호작용 안내
+config.notifications = 알림
+config.barks = 추종자의 한마디
+config.player_state = 체력과 열정
+config.day_cycle = 낮과 밤
+config.chore_progress = 잡일 레벨 상승
+config.onboarding = 튜토리얼 다음 단계
+config.combat_state = 전투 시작과 방 정리
+config.all_sounds = 모든 소리
+config.overall_volume = 전체 음량
+config.combat_cues = 전투 소리
+config.always_on = 항상 나는 소리
+config.minigame_cues = 미니게임 소리
+config.wayfinding_cues = 신호음
+config.all_combat_cues = 모든 전투 소리
+config.all_always_on = 모든 상시 소리
+config.all_minigame_cues = 모든 미니게임 소리
+config.all_wayfinding_cues = 신호음 켜기
+config.ambient_budget = 초당 최대 소리 수
+config.cue_on = 켜짐
+config.cue_volume = 음량
+config.cue_range = 범위
+config.cue_repeat = 반복
+config.cue_max_at_once = 동시 최대 수
+config.play_it = 재생
+config.hear_it_move = 움직임 듣기
+config.guidance_mode = 안내
+config.mode_beacon_and_speech = 신호음과 음성
+config.mode_beacon_only = 신호음만
+config.mode_speech_only = 음성만
+config.beacon_cues = 신호음 소리
+config.announce_interval = 안내 반복 간격
+config.scan_radius = 스캐너 범위
+config.enemy_range = 적 탐지 범위
+config.projectile_horizon = 투사체 경고 예고 시간
+config.cooking_lead = 요리 소리 예고 시간
+config.log_navigation = 이동 기록
+config.log_combat = 전투 기록
+config.log_dialogue = 대화 기록
+config.log_scan = 스캔 후보 기록
+config.log_bindings = 게임 키 배치 기록
+cue.beacon = 신호음
+cue.wall_near = 앞에 벽
+cue.wall_blocked = 벽에 닿음
+cue.dodge_direction = 회피 방향
+cue.dodge_blocked = 벽으로의 회피
+cue.melee_threat = 근접 공격 준비 동작
+cue.projectile_threat = 날아오는 사격
+cue.area_threat = 위험 구역
+cue.static_trap = 고정 함정
+cue.dodge_avoided_hit = 회피로 공격을 피함
+cue.timing_window = 타이밍 구간 열림
+cue.timing_chirp = 타이밍 구간의 경계
+cue.ambient_wall = 벽 소리
+cue.ambient_item = 아이템
+cue.ambient_interactable = 사용할 수 있는 물체
+cue.ambient_npc = 등장인물
+cue.ambient_enemy = 적
+cue.ambient_projectile = 날아다니는 탄
+config.cue_update = 갱신 주기
+config.sound_folder = 직접 만든 소리를 넣을 곳
+config.sound_folder_is = 직접 만든 소리 파일을 {0} 에 넣으세요. 각 파일 이름은 대체할 소리의 이름으로 하고 .wav, .ogg, .mp3 중 하나로 끝내세요. 소리 익히기에서 선택한 소리의 파일 이름을 알려 줍니다.
+config.sound_file_name = 대체 파일 이름: {0}
+config.wall_notes = 벽 음
+config.wall_notes_all = 모든 음
+config.wall_notes_one = 한 음
+config.wall_notes_two = 두 음
+config.wall_notes_hrtf = 세 음
+config.melee_reaction = 근접 소리 예고 시간
+config.wall_ring = 벽 방향
+config.wall_ring_four = 네 방향, 대각선 없음
+config.wall_ring_eight = 여덟 방향, 대각선 포함
+config.log_frame_budget = 프레임 시간 기록

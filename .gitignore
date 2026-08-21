@@ -1,0 +1,44 @@
+# Decompiled game code — derived from the local Steam install, never distribute
+decomp/
+
+# Build output
+bin/
+obj/
+*.user
+
+# Packaged releases. Built by scripts\package.ps1 and attached to a release rather
+# than tracked, so the repository never carries a stale zip claiming to be current.
+dist/
+
+# The NVDA controller client. Deliberately shipped to players and deliberately not
+# committed: it is LGPL 2.1 third-party binary, so it rides in the release assets
+# where its licence text travels with it. See THIRD_PARTY_NOTICES.md.
+# scripts\package.ps1 says where to put it if a fresh clone does not have it.
+lib/x64/
+
+# Scratch
+*.log
+
+# Workspace material, not part of the mod. README, CHANGELOG, LICENSE and
+# THIRD_PARTY_NOTICES are what a user needs — what it does, what changed, and what it is
+# built on. The rest is how the work gets done: a running status log, the game research
+# behind it, and post-mortems of our own mistakes. None of that is a user's business, and
+# none of it is referenced from the files that do ship.
+project_status.md
+docs/
+
+# AI assistant instruction and context files. Kept out of the repository so the
+# published project reads as the project rather than as a workspace. PRINCIPLES.md
+# belongs here despite reading like documentation: it is written to steer how the
+# next session works, not to describe the mod to a user.
+PRINCIPLES.md
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+.cursorrules
+.windsurfrules
+rules/
+rules.md
+.claude/
+.cursor/
+.aider*

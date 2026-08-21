@@ -1,0 +1,177 @@
+# CultAccess string catalogue - Portuguese (Brazil)
+#
+# STATUS: machine-draft. Translated by the mod's author tooling, NOT yet reviewed by a
+# native speaker. Corrections are welcome and require no rebuild: edit a value below,
+# or delete a line entirely to fall back to English.
+#
+# Known risk in this draft: a few lines name things the game itself also names, such as
+# the Shrine, Devotion and the Sermon. This file guesses those words. If the game uses a
+# different word in Portuguese (Brazil), change it here so the mod matches the rest of the interface.
+#
+#
+# COVERAGE: this draft translates the spoken interface - menu entries, cue names, values
+# and short sentences. The longer explanations that the help key reads out are not
+# translated yet and fall back to English, which is by design rather than an oversight:
+# a partial catalogue is a working catalogue. Adding them needs no rebuild.
+#
+# Keep the {0}, {1} placeholders. Reorder them freely to suit this language.
+# Lines starting with # are comments. Use 
+ for a line break inside a value.
+
+_meta.status = machine-draft
+_meta.translator =
+
+
+# EN: Next step, indoctrinate your new follower
+onboarding.indoctrinate = Próximo passo, doutrine seu novo seguidor
+
+# EN: Next step, go to the indoctrination platform and indoctrinate your new follower
+onboarding.indoctrinate_at_platform = Próximo passo, vá até a plataforma de doutrinação e doutrine seu novo seguidor
+
+# EN: Next step, build a Shrine
+onboarding.shrine = Próximo passo, construa um santuário
+
+# EN: Next step, command a follower to worship at the Shrine, then collect Devotion
+onboarding.devotion = Próximo passo, mande um seguidor orar no santuário e depois recolha a devoção
+
+# EN: Next step, {0}
+onboarding.unknown = Próximo passo, {0}
+
+# EN: Day {0}.
+day.new = Dia {0}.
+
+# EN: Day {0}. {1} available.
+day.new_with_restored = Dia {0}. {1} disponível.
+
+# EN: Night falls.
+day.nightfall = A noite cai.
+
+# EN: Day {0}, {1}
+day.status = Dia {0}, {1}
+
+# EN: Day {0}, {1}, about {2} until {3}
+day.status_with_countdown = Dia {0}, {1}, cerca de {2} até {3}
+
+# EN: {0} second
+duration.second = {0} segundo
+
+# EN: {0} seconds
+duration.seconds = {0} segundos
+
+# EN: {0}, entrance, walk in without pressing Interact
+entrance.open = {0}, entrada, entre sem apertar Interagir
+
+# EN: {0}, entrance, blocked
+entrance.blocked = {0}, entrada, bloqueada
+
+# EN: At {0}. Walk into the doorway to go inside.
+entrance.arrival_open = Em {0}. Atravesse a porta para entrar.
+
+# EN: Reached {0}. The doorway is blocked.
+entrance.arrival_blocked = Você chegou a {0}. A porta está bloqueada.
+
+# EN: requires {0} follower; you have {1}
+dungeon_door.requirement_one = exige {0} seguidor; você tem {1}
+
+# EN: requires {0} followers; you have {1}
+dungeon_door.requirement_many = exige {0} seguidores; você tem {1}
+
+
+# Settings menu, sound cues and the spoken values they use.
+config.title = Configurações do CultAccess
+config.on = ligado
+config.off = desligado
+config.percent = {0} por cento
+config.metres = {0} metros
+config.seconds = {0} segundos
+config.per_second = {0} por segundo
+config.page_empty = {0}. Não há nada para alterar aqui.
+config.page_items_many = {0} itens
+config.closed = Configurações fechadas.
+config.nothing_to_do = Não há nada a fazer neste item.
+config.no_detail = Sem explicação adicional para este item.
+config.currently_silent = no momento em silêncio, porque uma chave acima está desligada
+config.controls = Para cima e para baixo movem a seleção. Esquerda e direita alteram um valor. Enter abre uma seção ou executa uma ação. Backspace volta, e fecha o menu a partir do nível superior. {0} fecha de qualquer lugar. O jogo continua rodando, então abra isto quando estiver em segurança.
+config.speech = Fala
+config.sounds = Sons
+config.wayfinding = Orientação
+config.learn_sounds = Aprender os sons
+config.diagnostics = Diagnóstico
+config.speech_enabled = Fala
+config.verbosity = Nível de detalhe
+config.verbosity_low = baixo
+config.verbosity_diagnostic = diagnóstico
+config.menu_context = Nomes dos menus
+config.auto_read_panels = Ler os painéis automaticamente
+config.interaction_prompts = Avisos de interação
+config.notifications = Notificações
+config.barks = Falas dos seguidores
+config.player_state = Vida e fervor
+config.day_cycle = Dia e noite
+config.chore_progress = Níveis de tarefas
+config.onboarding = Próximo passo do tutorial
+config.combat_state = Início do combate e sala limpa
+config.all_sounds = Todos os sons
+config.overall_volume = Volume geral
+config.combat_cues = Sons de combate
+config.always_on = Sons contínuos
+config.minigame_cues = Sons dos minijogos
+config.wayfinding_cues = Sinalizador
+config.all_combat_cues = Todos os sons de combate
+config.all_always_on = Todos os sons contínuos
+config.all_minigame_cues = Todos os sons dos minijogos
+config.all_wayfinding_cues = Sinalizador ligado
+config.ambient_budget = Máximo de sons por segundo
+config.cue_on = Ligado
+config.cue_range = Alcance
+config.cue_repeat = Repetição
+config.cue_max_at_once = Máximo ao mesmo tempo
+config.play_it = Tocar
+config.hear_it_move = Ouvir se movendo
+config.guidance_mode = Orientação
+config.mode_beacon_and_speech = sinalizador e fala
+config.mode_beacon_only = somente sinalizador
+config.mode_speech_only = somente fala
+config.beacon_cues = Som do sinalizador
+config.announce_interval = Repetir a orientação a cada
+config.scan_radius = Alcance do scanner
+config.enemy_range = Alcance dos inimigos
+config.projectile_horizon = Antecedência do aviso de projétil
+config.cooking_lead = Antecedência do som de cozinha
+config.log_navigation = Registrar a navegação
+config.log_combat = Registrar o combate
+config.log_dialogue = Registrar os diálogos
+config.log_scan = Registrar candidatos da varredura
+config.log_bindings = Registrar as teclas do jogo
+cue.beacon = Sinalizador
+cue.wall_near = Parede à frente
+cue.wall_blocked = Contato com a parede
+cue.dodge_direction = Direção da esquiva
+cue.dodge_blocked = Esquiva contra uma parede
+cue.melee_threat = Ataque corpo a corpo se preparando
+cue.projectile_threat = Tiro chegando
+cue.area_threat = Área perigosa
+cue.static_trap = Armadilha fixa
+cue.dodge_avoided_hit = A esquiva evitou um golpe
+cue.timing_window = Janela de tempo aberta
+cue.timing_chirp = Borda da janela
+cue.ambient_wall = Tons das paredes
+cue.ambient_item = Itens
+cue.ambient_interactable = Objetos utilizáveis
+cue.ambient_npc = Personagens
+cue.ambient_enemy = Inimigos
+cue.ambient_projectile = Projéteis no ar
+config.cue_update = Taxa de atualização
+config.sound_folder = Onde colocar seus próprios sons
+config.sound_folder_is = Coloque seus arquivos de som em {0}. Nomeie cada arquivo com o nome do som que ele substitui, terminando em .wav, .ogg ou .mp3. Aprender os sons diz o nome do arquivo do som em que você está.
+config.sound_file_name = Nome do arquivo de substituição: {0}
+config.wall_notes = Notas das paredes
+config.wall_notes_all = todas as notas
+config.wall_notes_one = uma nota
+config.wall_notes_two = duas notas
+config.wall_notes_hrtf = três notas
+config.melee_reaction = Antecedência do som corpo a corpo
+config.wall_ring = Direções das paredes
+config.wall_ring_four = quatro, sem diagonais
+config.wall_ring_eight = oito, com diagonais
+config.log_frame_budget = Registrar os tempos de quadro

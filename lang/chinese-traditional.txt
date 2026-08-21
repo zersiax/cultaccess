@@ -1,0 +1,183 @@
+# CultAccess string catalogue - Chinese (Traditional)
+#
+# STATUS: machine-draft. Translated by the mod's author tooling, NOT yet reviewed by a
+# native speaker. Corrections are welcome and require no rebuild: edit a value below,
+# or delete a line entirely to fall back to English.
+#
+# Known risk in this draft: a few lines name things the game itself also names, such as
+# the Shrine, Devotion and the Sermon. This file guesses those words. If the game uses a
+# different word in Chinese (Traditional), change it here so the mod matches the rest of the interface.
+#
+#
+# COVERAGE: this draft translates the spoken interface - menu entries, cue names, values
+# and short sentences. The longer explanations that the help key reads out are not
+# translated yet and fall back to English, which is by design rather than an oversight:
+# a partial catalogue is a working catalogue. Adding them needs no rebuild.
+#
+# Keep the {0}, {1} placeholders. Reorder them freely to suit this language.
+# Lines starting with # are comments. Use 
+ for a line break inside a value.
+
+_meta.status = machine-draft
+_meta.translator =
+
+
+# EN: Next step, indoctrinate your new follower
+onboarding.indoctrinate = 下一步，感化你的新信徒
+
+# EN: Next step, go to the indoctrination platform and indoctrinate your new follower
+onboarding.indoctrinate_at_platform = 下一步，前往感化台並感化你的新信徒
+
+# EN: Next step, build a Shrine
+onboarding.shrine = 下一步，建造一座神龕
+
+# EN: Next step, command a follower to worship at the Shrine, then collect Devotion
+onboarding.devotion = 下一步，命令一名信徒在神龕前祈禱，然後收集虔誠
+
+# EN: Next step, {0}
+onboarding.unknown = 下一步，{0}
+
+# EN: Day {0}.
+day.new = 第 {0} 天。
+
+# EN: Day {0}. {1} available.
+day.new_with_restored = 第 {0} 天。{1}已可使用。
+
+# EN: Night falls.
+day.nightfall = 夜幕降臨。
+
+# EN: Day {0}, {1}
+day.status = 第 {0} 天，{1}
+
+# EN: Day {0}, {1}, about {2} until {3}
+day.status_with_countdown = 第 {0} 天，{1}，距離{3}約 {2}
+
+# EN: {0} second
+duration.second = {0} 秒
+
+# EN: {0} seconds
+duration.seconds = {0} 秒
+
+# EN: {0}, entrance, walk in without pressing Interact
+entrance.open = {0}，入口，無需按互動鍵，直接走進去
+
+# EN: {0}, entrance, blocked
+entrance.blocked = {0}，入口，已封閉
+
+# EN: At {0}. Walk into the doorway to go inside.
+entrance.arrival_open = 已抵達 {0}。走進門口即可進入。
+
+# EN: Reached {0}. The doorway is blocked.
+entrance.arrival_blocked = 已抵達 {0}。門口已封閉。
+
+# EN: requires {0} follower; you have {1}
+dungeon_door.requirement_one = 需要 {0} 名信徒；你有 {1} 名
+
+# EN: requires {0} followers; you have {1}
+dungeon_door.requirement_many = 需要 {0} 名信徒；你有 {1} 名
+
+
+# Settings menu, sound cues and the spoken values they use.
+config.title = CultAccess 設定
+config.item = 項目
+config.submenu = 子選單
+config.on = 開
+config.off = 關
+config.percent = 百分之 {0}
+config.metres = {0} 公尺
+config.seconds = {0} 秒
+config.per_second = 每秒 {0}
+config.page_empty = {0}。這裡沒有可變更的內容。
+config.page_items_one = 1 個項目
+config.page_items_many = {0} 個項目
+config.closed = 已關閉設定。
+config.nothing_to_do = 此項目沒有可執行的操作。
+config.no_detail = 此項目沒有更多說明。
+config.currently_silent = 目前靜音，因為上層的開關已關閉
+config.controls = 上下移動選擇。左右變更數值。Enter 開啟分區或執行動作。退格返回，在最上層則關閉選單。{0} 可在任何位置關閉。遊戲仍在執行，請在安全時開啟。
+config.speech = 語音
+config.sounds = 音效
+config.wayfinding = 尋路
+config.learn_sounds = 學習音效
+config.diagnostics = 診斷
+config.speech_enabled = 語音
+config.verbosity = 詳細程度
+config.verbosity_low = 低
+config.verbosity_normal = 普通
+config.verbosity_diagnostic = 诊断
+config.braille = 點字
+config.menu_context = 選單名稱
+config.auto_read_panels = 自動朗讀面板
+config.interaction_prompts = 互動提示
+config.notifications = 通知
+config.barks = 信徒的閒聊
+config.player_state = 生命與狂熱
+config.day_cycle = 白天與夜晚
+config.chore_progress = 雜務升級
+config.onboarding = 教學的下一步
+config.combat_state = 戰鬥開始與房間清空
+config.all_sounds = 所有音效
+config.overall_volume = 總音量
+config.combat_cues = 戰鬥提示音
+config.always_on = 常駐音效
+config.minigame_cues = 小遊戲提示音
+config.wayfinding_cues = 信标
+config.all_combat_cues = 所有戰鬥提示音
+config.all_always_on = 所有常駐音效
+config.all_minigame_cues = 所有小遊戲提示音
+config.all_wayfinding_cues = 開啟信標
+config.ambient_budget = 每秒最多音效數
+config.cue_on = 开
+config.cue_volume = 音量
+config.cue_range = 範圍
+config.cue_repeat = 重複
+config.cue_max_at_once = 同时最多
+config.play_it = 播放
+config.hear_it_move = 聽它移動
+config.guidance_mode = 引導
+config.mode_beacon_and_speech = 信標與語音
+config.mode_beacon_only = 僅信標
+config.mode_speech_only = 僅語音
+config.beacon_cues = 信標音效
+config.announce_interval = 引導重複間隔
+config.scan_radius = 掃描範圍
+config.enemy_range = 敵人範圍
+config.projectile_horizon = 彈道警告提前量
+config.cooking_lead = 烹飪提示提前量
+config.log_navigation = 記錄導航
+config.log_combat = 記錄戰鬥
+config.log_dialogue = 記錄對話
+config.log_scan = 記錄掃描候選
+config.log_bindings = 記錄遊戲按鍵
+cue.beacon = 信标
+cue.wall_near = 前方有牆
+cue.wall_blocked = 撞到牆
+cue.dodge_direction = 閃避方向
+cue.dodge_blocked = 閃避撞牆
+cue.melee_threat = 近戰起手動作
+cue.projectile_threat = 來襲射擊
+cue.area_threat = 危險區域
+cue.static_trap = 固定陷阱
+cue.dodge_avoided_hit = 閃避躲開了攻擊
+cue.timing_window = 時機視窗開啟
+cue.timing_chirp = 時機視窗邊緣
+cue.ambient_wall = 牆壁音
+cue.ambient_item = 物品
+cue.ambient_interactable = 可互動物體
+cue.ambient_npc = 角色
+cue.ambient_enemy = 敌人
+cue.ambient_projectile = 空中的彈幕
+config.cue_update = 更新頻率
+config.sound_folder = 自訂音效放在哪裡
+config.sound_folder_is = 把你的音效檔放到 {0}。每個檔案用它所取代的提示音命名，副檔名為 .wav、.ogg 或 .mp3。學習音效會唸出目前所選提示音的檔名。
+config.sound_file_name = 取代檔名：{0}
+config.wall_notes = 牆壁音高
+config.wall_notes_all = 全部音高
+config.wall_notes_one = 一個音
+config.wall_notes_two = 兩個音
+config.wall_notes_hrtf = 三個音
+config.melee_reaction = 近戰提示提前量
+config.wall_ring = 牆壁方向
+config.wall_ring_four = 四個方向，不含斜向
+config.wall_ring_eight = 八個方向，含斜向
+config.log_frame_budget = 記錄影格時間

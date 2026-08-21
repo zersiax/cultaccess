@@ -1,0 +1,181 @@
+# CultAccess string catalogue - German
+#
+# STATUS: machine-draft. Translated by the mod's author tooling, NOT yet reviewed by a
+# native speaker. Corrections are welcome and require no rebuild: edit a value below,
+# or delete a line entirely to fall back to English.
+#
+# Known risk in this draft: a few lines name things the game itself also names, such as
+# the Shrine, Devotion and the Sermon. This file guesses those words. If the game uses a
+# different word in German, change it here so the mod matches the rest of the interface.
+#
+#
+# COVERAGE: this draft translates the spoken interface - menu entries, cue names, values
+# and short sentences. The longer explanations that the help key reads out are not
+# translated yet and fall back to English, which is by design rather than an oversight:
+# a partial catalogue is a working catalogue. Adding them needs no rebuild.
+#
+# Keep the {0}, {1} placeholders. Reorder them freely to suit this language.
+# Lines starting with # are comments. Use 
+ for a line break inside a value.
+
+_meta.status = machine-draft
+_meta.translator =
+
+
+# EN: Next step, indoctrinate your new follower
+onboarding.indoctrinate = Nächster Schritt, indoktriniere deinen neuen Anhänger
+
+# EN: Next step, go to the indoctrination platform and indoctrinate your new follower
+onboarding.indoctrinate_at_platform = Nächster Schritt, gehe zur Indoktrinierungsplattform und indoktriniere deinen neuen Anhänger
+
+# EN: Next step, build a Shrine
+onboarding.shrine = Nächster Schritt, baue einen Schrein
+
+# EN: Next step, command a follower to worship at the Shrine, then collect Devotion
+onboarding.devotion = Nächster Schritt, befiehl einem Anhänger, am Schrein zu beten, und sammle dann Hingabe
+
+# EN: Next step, {0}
+onboarding.unknown = Nächster Schritt, {0}
+
+# EN: Day {0}.
+day.new = Tag {0}.
+
+# EN: Day {0}. {1} available.
+day.new_with_restored = Tag {0}. {1} verfügbar.
+
+# EN: Night falls.
+day.nightfall = Die Nacht bricht herein.
+
+# EN: Day {0}, {1}
+day.status = Tag {0}, {1}
+
+# EN: Day {0}, {1}, about {2} until {3}
+day.status_with_countdown = Tag {0}, {1}, noch etwa {2} bis {3}
+
+# EN: {0} second
+duration.second = {0} Sekunde
+
+# EN: {0} seconds
+duration.seconds = {0} Sekunden
+
+# EN: {0}, entrance, walk in without pressing Interact
+entrance.open = {0}, Eingang, gehe hinein, ohne Interagieren zu drücken
+
+# EN: {0}, entrance, blocked
+entrance.blocked = {0}, Eingang, blockiert
+
+# EN: At {0}. Walk into the doorway to go inside.
+entrance.arrival_open = Bei {0}. Gehe durch die Tür, um einzutreten.
+
+# EN: Reached {0}. The doorway is blocked.
+entrance.arrival_blocked = {0} erreicht. Die Tür ist blockiert.
+
+# EN: requires {0} follower; you have {1}
+dungeon_door.requirement_one = benötigt {0} Anhänger; du hast {1}
+
+# EN: requires {0} followers; you have {1}
+dungeon_door.requirement_many = benötigt {0} Anhänger; du hast {1}
+
+
+# Settings menu, sound cues and the spoken values they use.
+config.title = CultAccess-Einstellungen
+config.item = Eintrag
+config.submenu = Untermenü
+config.on = an
+config.off = aus
+config.percent = {0} Prozent
+config.metres = {0} Meter
+config.seconds = {0} Sekunden
+config.per_second = {0} pro Sekunde
+config.page_empty = {0}. Hier gibt es nichts zu ändern.
+config.page_items_one = 1 Eintrag
+config.page_items_many = {0} Einträge
+config.closed = Einstellungen geschlossen.
+config.nothing_to_do = Bei diesem Eintrag gibt es nichts zu tun.
+config.no_detail = Für diesen Eintrag gibt es keine weitere Erklärung.
+config.currently_silent = derzeit stumm, weil ein Schalter darüber aus ist
+config.controls = Auf und ab bewegen die Auswahl. Links und rechts ändern einen Wert. Eingabe öffnet einen Bereich oder führt eine Aktion aus. Rücktaste geht zurück und schließt das Menü von der obersten Ebene. {0} schließt es von überall. Das Spiel läuft weiter, öffne dies also nur, wenn du sicher bist.
+config.speech = Sprache
+config.sounds = Töne
+config.wayfinding = Wegführung
+config.learn_sounds = Töne lernen
+config.diagnostics = Diagnose
+config.speech_enabled = Sprachausgabe
+config.verbosity = Ausführlichkeit
+config.verbosity_low = gering
+config.verbosity_diagnostic = diagnostisch
+config.menu_context = Menünamen
+config.auto_read_panels = Fenster automatisch vorlesen
+config.interaction_prompts = Interaktionshinweise
+config.notifications = Benachrichtigungen
+config.barks = Zurufe der Anhänger
+config.player_state = Leben und Inbrunst
+config.day_cycle = Tag und Nacht
+config.chore_progress = Aufstiege bei Aufgaben
+config.onboarding = Nächster Schritt im Tutorial
+config.combat_state = Kampfbeginn und Raum gesäubert
+config.all_sounds = Alle Töne
+config.overall_volume = Gesamtlautstärke
+config.combat_cues = Kampftöne
+config.always_on = Dauerhafte Töne
+config.minigame_cues = Minispiel-Töne
+config.wayfinding_cues = Peilton
+config.all_combat_cues = Alle Kampftöne
+config.all_always_on = Alle dauerhaften Töne
+config.all_minigame_cues = Alle Minispiel-Töne
+config.all_wayfinding_cues = Peilton an
+config.ambient_budget = Höchstzahl Töne pro Sekunde
+config.cue_on = An
+config.cue_volume = Lautstärke
+config.cue_range = Reichweite
+config.cue_repeat = Wiederholung
+config.cue_max_at_once = Höchstzahl gleichzeitig
+config.play_it = Abspielen
+config.hear_it_move = Bewegung anhören
+config.guidance_mode = Führung
+config.mode_beacon_and_speech = Peilton und Sprache
+config.mode_beacon_only = nur Peilton
+config.mode_speech_only = nur Sprache
+config.beacon_cues = Peilton-Klang
+config.announce_interval = Führung wiederholen alle
+config.scan_radius = Scanner-Reichweite
+config.enemy_range = Gegner-Reichweite
+config.projectile_horizon = Vorlauf der Geschosswarnung
+config.cooking_lead = Vorlauf des Kochtons
+config.log_navigation = Navigation protokollieren
+config.log_combat = Kampf protokollieren
+config.log_dialogue = Dialoge protokollieren
+config.log_scan = Scan-Kandidaten protokollieren
+config.log_bindings = Tastenbelegung des Spiels protokollieren
+cue.beacon = Peilton
+cue.wall_near = Wand voraus
+cue.wall_blocked = Wandberührung
+cue.dodge_direction = Ausweichrichtung
+cue.dodge_blocked = Ausweichen gegen eine Wand
+cue.melee_threat = Nahkampf-Ausholen
+cue.projectile_threat = Geschoss im Anflug
+cue.area_threat = Gefahrenbereich
+cue.static_trap = Feste Falle
+cue.dodge_avoided_hit = Ausweichen hat getroffen verhindert
+cue.timing_window = Zeitfenster offen
+cue.timing_chirp = Rand des Zeitfensters
+cue.ambient_wall = Wandtöne
+cue.ambient_item = Gegenstände
+cue.ambient_interactable = Benutzbare Objekte
+cue.ambient_npc = Figuren
+cue.ambient_enemy = Gegner
+cue.ambient_projectile = Geschosse in der Luft
+config.cue_update = Aktualisierungsrate
+config.sound_folder = Wohin mit eigenen Tönen
+config.sound_folder_is = Lege eigene Tondateien in {0} ab. Benenne jede Datei nach dem Ton, den sie ersetzt, mit der Endung .wav, .ogg oder .mp3. Töne lernen nennt den Dateinamen zum jeweiligen Ton.
+config.sound_file_name = Dateiname zum Ersetzen: {0}
+config.wall_notes = Wandtöne
+config.wall_notes_all = alle Töne
+config.wall_notes_one = ein Ton
+config.wall_notes_two = zwei Töne
+config.wall_notes_hrtf = drei Töne
+config.melee_reaction = Vorlauf des Nahkampftons
+config.wall_ring = Wandrichtungen
+config.wall_ring_four = vier, ohne Diagonalen
+config.wall_ring_eight = acht, mit Diagonalen
+config.log_frame_budget = Bildzeiten protokollieren

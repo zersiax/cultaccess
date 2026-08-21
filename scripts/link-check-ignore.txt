@@ -1,0 +1,8 @@
+# URLs that are deliberately dead and must stay in the text.
+# Format: <url> = <why>
+# Anything listed here is reported as intentionally-dead rather than silently skipped.
+
+https://thunderstore.io/c/cult-of-the-lamb/p/BepInEx/BepInExPack/ = the fabricated URL that shipped to testers and 404s; quoted in the post-mortem as the example
+https://ebs-v2.cotl.devolver.digital = the game's Twitch extension backend, quoted as evidence in game-api.md; an API host with no page at its root
+https://twitch-realtime.cotl.devolver.digital = the game's Twitch Socket.IO host, quoted as evidence in game-api.md; not a web page
+https://twitch-link.cotl.devolver.digital = the game's Twitch account-link service, quoted as evidence in game-api.md; not a web page

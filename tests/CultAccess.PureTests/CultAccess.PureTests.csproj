@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\src\CultAccess\Util\RichText.cs" Link="RichText.cs" />
+    <Compile Include="..\..\src\CultAccess\Localization\Strings.cs" Link="Strings.cs" />
+    <Compile Include="..\..\src\CultAccess\Localization\StringDefaults.cs" Link="StringDefaults.cs" />
+    <Compile Include="..\..\src\CultAccess\Navigation\DungeonDoorText.cs" Link="DungeonDoorText.cs" />
+    <Compile Include="..\..\src\CultAccess\Navigation\BuildingEntranceText.cs" Link="BuildingEntranceText.cs" />
+    <Compile Include="..\..\src\CultAccess\Navigation\RoutePlanarMath.cs" Link="RoutePlanarMath.cs" />
+    <Compile Include="..\..\src\CultAccess\Navigation\RouteGuidanceText.cs" Link="RouteGuidanceText.cs" />
+    <Compile Include="..\..\src\CultAccess\Status\PlayerStatusText.cs" Link="PlayerStatusText.cs" />
+    <Compile Include="..\..\src\CultAccess\Status\OnboardingText.cs" Link="OnboardingText.cs" />
+    <Compile Include="..\..\src\CultAccess\Status\DayCycleText.cs" Link="DayCycleText.cs" />
+    <Compile Include="..\..\src\CultAccess\Combat\ThreatPrediction.cs" Link="ThreatPrediction.cs" />
+    <Compile Include="..\..\src\CultAccess\UI\ProgressionText.cs" Link="ProgressionText.cs" />
+    <Compile Include="..\..\src\CultAccess\UI\SpeakerNameText.cs" Link="SpeakerNameText.cs" />
+    <Compile Include="..\..\src\CultAccess\Audio\Waveform.cs" Link="Waveform.cs" />
+    <Compile Include="..\..\src\CultAccess\Audio\CueId.cs" Link="CueId.cs" />
+    <Compile Include="..\..\src\CultAccess\Audio\CueLibrary.cs" Link="CueLibrary.cs" />
+    <Compile Include="..\..\src\CultAccess\Audio\SoundscapeFalloff.cs" Link="SoundscapeFalloff.cs" />
+    <Compile Include="..\..\src\CultAccess\Audio\WallDirection.cs" Link="WallDirection.cs" />
+    <Compile Include="..\..\src\CultAccess\Audio\WallToneScheme.cs" Link="WallToneScheme.cs" />
+    <Compile Include="..\..\src\CultAccess\Audio\BeaconTone.cs" Link="BeaconTone.cs" />
+    <Compile Include="..\..\src\CultAccess\UI\ConfigMenuModel.cs" Link="ConfigMenuModel.cs" />
+    <Compile Include="..\..\src\CultAccess\UI\ConfigMenuText.cs" Link="ConfigMenuText.cs" />
+  </ItemGroup>
+</Project>

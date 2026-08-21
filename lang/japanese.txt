@@ -1,0 +1,183 @@
+# CultAccess string catalogue - Japanese
+#
+# STATUS: machine-draft. Translated by the mod's author tooling, NOT yet reviewed by a
+# native speaker. Corrections are welcome and require no rebuild: edit a value below,
+# or delete a line entirely to fall back to English.
+#
+# Known risk in this draft: a few lines name things the game itself also names, such as
+# the Shrine, Devotion and the Sermon. This file guesses those words. If the game uses a
+# different word in Japanese, change it here so the mod matches the rest of the interface.
+#
+#
+# COVERAGE: this draft translates the spoken interface - menu entries, cue names, values
+# and short sentences. The longer explanations that the help key reads out are not
+# translated yet and fall back to English, which is by design rather than an oversight:
+# a partial catalogue is a working catalogue. Adding them needs no rebuild.
+#
+# Keep the {0}, {1} placeholders. Reorder them freely to suit this language.
+# Lines starting with # are comments. Use 
+ for a line break inside a value.
+
+_meta.status = machine-draft
+_meta.translator =
+
+
+# EN: Next step, indoctrinate your new follower
+onboarding.indoctrinate = 次の目標、新しい信者を入信させる
+
+# EN: Next step, go to the indoctrination platform and indoctrinate your new follower
+onboarding.indoctrinate_at_platform = 次の目標、入信の台へ行き、新しい信者を入信させる
+
+# EN: Next step, build a Shrine
+onboarding.shrine = 次の目標、祭壇を建てる
+
+# EN: Next step, command a follower to worship at the Shrine, then collect Devotion
+onboarding.devotion = 次の目標、信者に祭壇で祈るよう命じ、信仰心を集める
+
+# EN: Next step, {0}
+onboarding.unknown = 次の目標、{0}
+
+# EN: Day {0}.
+day.new = {0}日目。
+
+# EN: Day {0}. {1} available.
+day.new_with_restored = {0}日目。{1}が可能になりました。
+
+# EN: Night falls.
+day.nightfall = 夜になりました。
+
+# EN: Day {0}, {1}
+day.status = {0}日目、{1}
+
+# EN: Day {0}, {1}, about {2} until {3}
+day.status_with_countdown = {0}日目、{1}、{3}まで約{2}
+
+# EN: {0} second
+duration.second = {0}秒
+
+# EN: {0} seconds
+duration.seconds = {0}秒
+
+# EN: {0}, entrance, walk in without pressing Interact
+entrance.open = {0}、入口、決定を押さずに歩いて入れます
+
+# EN: {0}, entrance, blocked
+entrance.blocked = {0}、入口、ふさがれています
+
+# EN: At {0}. Walk into the doorway to go inside.
+entrance.arrival_open = {0}に到着。入口を通って中に入ってください。
+
+# EN: Reached {0}. The doorway is blocked.
+entrance.arrival_blocked = {0}に到着。入口はふさがれています。
+
+# EN: requires {0} follower; you have {1}
+dungeon_door.requirement_one = 信者が{0}人必要です。現在{1}人
+
+# EN: requires {0} followers; you have {1}
+dungeon_door.requirement_many = 信者が{0}人必要です。現在{1}人
+
+
+# Settings menu, sound cues and the spoken values they use.
+config.title = CultAccess の設定
+config.item = 項目
+config.submenu = サブメニュー
+config.on = オン
+config.off = オフ
+config.percent = {0} パーセント
+config.metres = {0} メートル
+config.seconds = {0} 秒
+config.per_second = 毎秒 {0}
+config.page_empty = {0}。ここに変更できるものはありません。
+config.page_items_one = 1 項目
+config.page_items_many = {0} 項目
+config.closed = 設定を閉じました。
+config.nothing_to_do = この項目にできることはありません。
+config.no_detail = この項目に追加の説明はありません。
+config.currently_silent = 上位のスイッチがオフのため、現在は無音です
+config.controls = 上下で選択を移動します。左右で値を変更します。Enter でセクションを開くか動作を実行します。Backspace で戻り、一番上の階層ではメニューを閉じます。{0} はどこからでも閉じます。ゲームは動き続けるので、安全なときに開いてください。
+config.speech = 音声
+config.sounds = サウンド
+config.wayfinding = 道案内
+config.learn_sounds = サウンドを覚える
+config.diagnostics = 診断
+config.speech_enabled = 音声
+config.verbosity = 詳細度
+config.verbosity_low = 低
+config.verbosity_normal = 標準
+config.verbosity_diagnostic = 診断
+config.braille = 点字
+config.menu_context = メニュー名
+config.auto_read_panels = パネルを自動で読む
+config.interaction_prompts = 操作の案内
+config.notifications = 通知
+config.barks = 信者のひとこと
+config.player_state = 体力と熱意
+config.day_cycle = 昼と夜
+config.chore_progress = 雑務のレベルアップ
+config.onboarding = チュートリアルの次の手順
+config.combat_state = 戦闘開始と部屋の制圧
+config.all_sounds = すべてのサウンド
+config.overall_volume = 全体の音量
+config.combat_cues = 戦闘のサウンド
+config.always_on = 常時鳴るサウンド
+config.minigame_cues = ミニゲームのサウンド
+config.wayfinding_cues = ビーコン
+config.all_combat_cues = すべての戦闘サウンド
+config.all_always_on = すべての常時サウンド
+config.all_minigame_cues = すべてのミニゲームサウンド
+config.all_wayfinding_cues = ビーコンをオン
+config.ambient_budget = 毎秒の最大サウンド数
+config.cue_on = オン
+config.cue_volume = 音量
+config.cue_range = 範囲
+config.cue_repeat = 繰り返し
+config.cue_max_at_once = 同時の最大数
+config.play_it = 再生する
+config.hear_it_move = 動きを聴く
+config.guidance_mode = 誘導
+config.mode_beacon_and_speech = ビーコンと音声
+config.mode_beacon_only = ビーコンのみ
+config.mode_speech_only = 音声のみ
+config.beacon_cues = ビーコンの音
+config.announce_interval = 誘導を繰り返す間隔
+config.scan_radius = スキャナーの範囲
+config.enemy_range = 敵の探知範囲
+config.projectile_horizon = 飛び道具警告の先読み
+config.cooking_lead = 料理サウンドの先読み
+config.log_navigation = 移動をログに記録
+config.log_combat = 戦闘をログに記録
+config.log_dialogue = 会話をログに記録
+config.log_scan = スキャン候補をログに記録
+config.log_bindings = ゲームのキー割り当てをログに記録
+cue.beacon = ビーコン
+cue.wall_near = 前方に壁
+cue.wall_blocked = 壁に接触
+cue.dodge_direction = 回避の方向
+cue.dodge_blocked = 壁への回避
+cue.melee_threat = 近接攻撃の予備動作
+cue.projectile_threat = 飛来する射撃
+cue.area_threat = 危険な範囲
+cue.static_trap = 固定の罠
+cue.dodge_avoided_hit = 回避で攻撃を防いだ
+cue.timing_window = タイミングの好機
+cue.timing_chirp = 好機の境目
+cue.ambient_wall = 壁の音
+cue.ambient_item = アイテム
+cue.ambient_interactable = 操作できる物
+cue.ambient_npc = キャラクター
+cue.ambient_enemy = 敵
+cue.ambient_projectile = 飛んでいる弾
+config.cue_update = 更新の頻度
+config.sound_folder = 自分のサウンドを置く場所
+config.sound_folder_is = 自分のサウンドファイルを {0} に入れてください。置き換えるサウンドの名前をファイル名にし、拡張子は .wav、.ogg、.mp3 のいずれかにします。サウンドを覚えるでは、選択中のサウンドのファイル名を読み上げます。
+config.sound_file_name = 差し替え用のファイル名: {0}
+config.wall_notes = 壁の音程
+config.wall_notes_all = すべての音程
+config.wall_notes_one = 1 つの音程
+config.wall_notes_two = 2 つの音程
+config.wall_notes_hrtf = 3 つの音程
+config.melee_reaction = 近接サウンドの先読み
+config.wall_ring = 壁の方向
+config.wall_ring_four = 4 方向、斜めなし
+config.wall_ring_eight = 8 方向、斜めあり
+config.log_frame_budget = フレーム時間をログに記録

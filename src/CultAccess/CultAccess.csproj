@@ -1,0 +1,144 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>CultAccess</AssemblyName>
+    <RootNamespace>CultAccess</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Version>0.1.0</Version>
+    <DebugType>portable</DebugType>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <DeployOnBuild Condition="'$(DeployOnBuild)' == ''">true</DeployOnBuild>
+
+    <!-- Reference the installed game directly: no NuGet, fully offline. -->
+    <GameDir Condition="'$(GameDir)' == ''">C:\Program Files (x86)\Steam\steamapps\common\Cult of the Lamb</GameDir>
+    <ManagedDir>$(GameDir)\Cult Of The Lamb_Data\Managed</ManagedDir>
+    <BepInExDir>$(GameDir)\BepInEx</BepInExDir>
+
+    <!-- Unity assemblies ship without XML docs and trip these; they are not our problem. -->
+    <NoWarn>$(NoWarn);CS0436;CS1701;CS1702</NoWarn>
+
+    <!--
+      Referencing the game's Managed folder drags in its bundled BCL facades, which
+      conflict with the netstandard reference pack. The runtime resolves against the
+      game's own assemblies, so the unification warnings are noise — and dozens of
+      lines of it makes real errors hard to find when reading build output aloud.
+    -->
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);MSB3277</MSBuildWarningsAsMessages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExDir)\core\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExDir)\core\0Harmony.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(ManagedDir)\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(ManagedDir)\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(ManagedDir)\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(ManagedDir)\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(ManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(ManagedDir)\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.InputSystem">
+      <HintPath>$(ManagedDir)\Unity.InputSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(ManagedDir)\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(ManagedDir)\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
+    <!-- Blocker evidence uses the live 2D colliders that also drive A* graph updates. -->
+    <Reference Include="UnityEngine.Physics2DModule">
+      <HintPath>$(ManagedDir)\UnityEngine.Physics2DModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VideoModule">
+      <HintPath>$(ManagedDir)\UnityEngine.VideoModule.dll</HintPath>
+    </Reference>
+    <Reference Include="FMODUnity">
+      <HintPath>$(ManagedDir)\FMODUnity.dll</HintPath>
+    </Reference>
+    <Reference Include="Rewired_Core">
+      <HintPath>$(ManagedDir)\Rewired_Core.dll</HintPath>
+    </Reference>
+    <!-- The game's own navmesh: we path on its graph rather than inventing one. -->
+    <Reference Include="AstarPathfindingProject">
+      <HintPath>$(ManagedDir)\AstarPathfindingProject.dll</HintPath>
+    </Reference>
+    <!-- Characters are Spine rigs; SkeletonAnimation is how we find ones with no label. -->
+    <Reference Include="spine-unity">
+      <HintPath>$(ManagedDir)\spine-unity.dll</HintPath>
+    </Reference>
+    <!-- UIMenuBase derives from Odin's SerializedMonoBehaviour. -->
+    <Reference Include="Sirenix.Serialization">
+      <HintPath>$(ManagedDir)\Sirenix.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.Utilities">
+      <HintPath>$(ManagedDir)\Sirenix.Utilities.dll</HintPath>
+    </Reference>
+    <Reference Include="Sirenix.OdinInspector.Attributes">
+      <HintPath>$(ManagedDir)\Sirenix.OdinInspector.Attributes.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Game references must never be copied next to our plugin. -->
+  <ItemGroup>
+    <Reference Update="@(Reference)">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!--
+    Native screen-reader libraries ship next to the plugin DLL, not in the game root.
+    NativeLoader pins them by absolute path at startup so DllImport can find them there.
+  -->
+  <ItemGroup>
+    <NativeLib Include="$(MSBuildProjectDirectory)\..\..\lib\x64\*.dll" />
+    <NativeLib Include="$(MSBuildProjectDirectory)\..\..\lib\*.txt" />
+  </ItemGroup>
+
+  <!-- The string catalogue ships as editable text so a user can add a language
+       without rebuilding, per the ruleset's localisation rules. -->
+  <ItemGroup>
+    <LangFile Include="$(MSBuildProjectDirectory)\..\..\lang\*.txt" />
+  </ItemGroup>
+
+  <!-- The sound folder ships with its instructions and no audio. Every cue is generated in
+       code; a file dropped here overrides one, the same shape as the language files. -->
+  <ItemGroup>
+    <SoundFile Include="$(MSBuildProjectDirectory)\..\..\sounds\*.txt" />
+  </ItemGroup>
+
+  <Target Name="DeployToGame" AfterTargets="Build"
+          Condition="'$(DeployOnBuild)' == 'true' And Exists('$(BepInExDir)')">
+    <PropertyGroup>
+      <DeployDir>$(BepInExDir)\plugins\CultAccess</DeployDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(DeployDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeployDir)" />
+    <Copy SourceFiles="@(NativeLib)" DestinationFolder="$(DeployDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(LangFile)" DestinationFolder="$(DeployDir)\lang" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(SoundFile)" DestinationFolder="$(DeployDir)\sounds" SkipUnchangedFiles="true" />
+    <Message Importance="high" Text="Deployed $(AssemblyName).dll + @(NativeLib->Count()) native file(s) -> $(DeployDir)" />
+  </Target>
+
+</Project>

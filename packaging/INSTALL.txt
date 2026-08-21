@@ -1,0 +1,123 @@
+CultAccess - installation
+=========================
+
+A screen reader accessibility mod for Cult of the Lamb (Steam, version 1.5.25.1049).
+
+This is a TEST build. It is not finished software, and some features listed in
+TESTING.txt have never been confirmed by anyone but the author.
+
+
+WHAT YOU NEED
+-------------
+
+  - Cult of the Lamb on Steam, on Windows.
+  - BepInEx, which is NOT in this package and which you download once. See below.
+  - A screen reader. NVDA is what the mod targets and supports best.
+
+The NVDA bridge library is included, so you do not need to hunt for it separately.
+Tolk is supported if you already have it, but is not included.
+
+
+EASIEST INSTALL
+---------------
+
+Double-click  Install CultAccess.cmd
+
+Windows will ask for permission, because the game normally lives under Program
+Files. Choose Yes. A small window opens that:
+
+  - finds the game for you, including on other drives
+  - downloads and installs BepInEx if you do not have it
+  - copies the mod in and checks the copy is correct
+
+Everything it does is written into a Progress box you can arrow through with your
+screen reader afterwards. Press Install, wait, and read the messages.
+
+If the game is somewhere unusual, use the Browse button to point at the folder
+that contains "Cult Of The Lamb.exe".
+
+
+WHAT IS IN THIS FOLDER
+----------------------
+
+  Install CultAccess.cmd   the only file you need to run
+  INSTALL.txt              this file
+  TESTING.txt              what to test and what to send back
+  installer\               scripts the installer uses; you can ignore these
+  plugins\                 the mod itself, copied in for you by the installer
+
+Keep the folders together. The installer finds the mod relative to itself, so it
+still works if you move things, but only while everything stays in one place.
+
+
+COMMAND LINE INSTEAD
+--------------------
+
+If you prefer a shell, installer\install.ps1 does exactly the same thing:
+
+       .\installer\install.ps1
+       .\installer\install.ps1 -GameDir "D:\Steam\steamapps\common\Cult of the Lamb"
+       .\installer\install.ps1 -BepInExZip "$HOME\Downloads\BepInExPack.zip"
+
+The last form skips the download and uses a zip you already have.
+
+
+MANUAL INSTALL
+--------------
+
+If you would rather not run a script:
+
+  1. Extract the BepInEx pack. Inside it, find the level that contains winhttp.dll.
+     Copy everything at that level into your Cult of the Lamb folder, so that
+     winhttp.dll sits next to "Cult Of The Lamb.exe".
+
+  2. Start the game once and quit. This lets BepInEx create its folders.
+
+  3. Copy the folder  plugins\CultAccess  from this package into
+       <game folder>\BepInEx\plugins\
+     so you end up with  <game folder>\BepInEx\plugins\CultAccess\CultAccess.dll
+
+  4. Start the game.
+
+
+CHECKING IT WORKED
+------------------
+
+Within a few seconds of the game starting you should hear:
+
+    "Cult Access loaded, using NVDA controller client."
+
+If you hear nothing at all, see TESTING.txt.
+
+
+WHY BEPINEX IS DOWNLOADED RATHER THAN INCLUDED
+---------------------------------------------
+
+BepInEx is a separate open source project with its own licence and its own
+distribution, so this package does not redistribute it. The installer fetches the
+current version directly from that distribution instead, which means you still
+only have to do one thing, and you get whatever version is current rather than a
+copy frozen at whenever this package was built.
+
+If you have no internet on the machine, download the pack elsewhere and pass it
+with -BepInExZip as shown above.
+
+
+UNINSTALLING
+------------
+
+Delete  <game folder>\BepInEx\plugins\CultAccess  to remove the mod.
+Delete  <game folder>\BepInEx  and  winhttp.dll  to remove BepInEx too.
+Nothing is written to your save files.
+
+
+LANGUAGES
+---------
+
+The mod follows the language you set in the game. Fourteen non-English
+translations are included, but all of them are machine drafts and have not been
+reviewed by native speakers.
+
+If the wording is wrong, you can fix it yourself without rebuilding anything:
+edit the matching file in  BepInEx\plugins\CultAccess\lang\  and restart the
+game. Delete any line to fall back to English. Corrections are very welcome.

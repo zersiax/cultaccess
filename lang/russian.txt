@@ -1,0 +1,183 @@
+# CultAccess string catalogue - Russian
+#
+# STATUS: machine-draft. Translated by the mod's author tooling, NOT yet reviewed by a
+# native speaker. Corrections are welcome and require no rebuild: edit a value below,
+# or delete a line entirely to fall back to English.
+#
+# Known risk in this draft: a few lines name things the game itself also names, such as
+# the Shrine, Devotion and the Sermon. This file guesses those words. If the game uses a
+# different word in Russian, change it here so the mod matches the rest of the interface.
+#
+#
+# COVERAGE: this draft translates the spoken interface - menu entries, cue names, values
+# and short sentences. The longer explanations that the help key reads out are not
+# translated yet and fall back to English, which is by design rather than an oversight:
+# a partial catalogue is a working catalogue. Adding them needs no rebuild.
+#
+# Keep the {0}, {1} placeholders. Reorder them freely to suit this language.
+# Lines starting with # are comments. Use 
+ for a line break inside a value.
+
+_meta.status = machine-draft
+_meta.translator =
+
+
+# EN: Next step, indoctrinate your new follower
+onboarding.indoctrinate = Следующий шаг: посвятите нового последователя
+
+# EN: Next step, go to the indoctrination platform and indoctrinate your new follower
+onboarding.indoctrinate_at_platform = Следующий шаг: подойдите к площадке посвящения и посвятите нового последователя
+
+# EN: Next step, build a Shrine
+onboarding.shrine = Следующий шаг: постройте святилище
+
+# EN: Next step, command a follower to worship at the Shrine, then collect Devotion
+onboarding.devotion = Следующий шаг: прикажите последователю молиться у святилища, затем соберите преданность
+
+# EN: Next step, {0}
+onboarding.unknown = Следующий шаг: {0}
+
+# EN: Day {0}.
+day.new = День {0}.
+
+# EN: Day {0}. {1} available.
+day.new_with_restored = День {0}. Доступно: {1}.
+
+# EN: Night falls.
+day.nightfall = Наступает ночь.
+
+# EN: Day {0}, {1}
+day.status = День {0}, {1}
+
+# EN: Day {0}, {1}, about {2} until {3}
+day.status_with_countdown = День {0}, {1}, примерно {2} до {3}
+
+# EN: {0} second
+duration.second = {0} секунда
+
+# EN: {0} seconds
+duration.seconds = {0} секунд
+
+# EN: {0}, entrance, walk in without pressing Interact
+entrance.open = {0}, вход, войдите, не нажимая «Взаимодействие»
+
+# EN: {0}, entrance, blocked
+entrance.blocked = {0}, вход, заблокирован
+
+# EN: At {0}. Walk into the doorway to go inside.
+entrance.arrival_open = У {0}. Пройдите в дверной проём, чтобы войти.
+
+# EN: Reached {0}. The doorway is blocked.
+entrance.arrival_blocked = Вы достигли {0}. Проход заблокирован.
+
+# EN: requires {0} follower; you have {1}
+dungeon_door.requirement_one = требуется {0} последователь; у вас {1}
+
+# EN: requires {0} followers; you have {1}
+dungeon_door.requirement_many = требуется {0} последователей; у вас {1}
+
+
+# Settings menu, sound cues and the spoken values they use.
+config.title = Настройки CultAccess
+config.item = пункт
+config.submenu = подменю
+config.on = включено
+config.off = выключено
+config.percent = {0} процентов
+config.metres = {0} метров
+config.seconds = {0} секунд
+config.per_second = {0} в секунду
+config.page_empty = {0}. Здесь нечего менять.
+config.page_items_one = 1 пункт
+config.page_items_many = пунктов: {0}
+config.closed = Настройки закрыты.
+config.nothing_to_do = С этим пунктом делать нечего.
+config.no_detail = Для этого пункта нет дополнительного пояснения.
+config.currently_silent = сейчас беззвучно, потому что выключен переключатель выше
+config.controls = Вверх и вниз перемещают выбор. Влево и вправо меняют значение. Ввод открывает раздел или выполняет действие. Backspace возвращает назад и закрывает меню с верхнего уровня. {0} закрывает его откуда угодно. Игра продолжает идти, поэтому открывайте это, когда вы в безопасности.
+config.speech = Речь
+config.sounds = Звуки
+config.wayfinding = Ориентирование
+config.learn_sounds = Изучение звуков
+config.diagnostics = Диагностика
+config.speech_enabled = Речь
+config.verbosity = Уровень подробности
+config.verbosity_low = низкий
+config.verbosity_normal = обычный
+config.verbosity_diagnostic = диагностический
+config.braille = Брайль
+config.menu_context = Названия меню
+config.auto_read_panels = Читать панели автоматически
+config.interaction_prompts = Подсказки взаимодействия
+config.notifications = Уведомления
+config.barks = Реплики последователей
+config.player_state = Здоровье и рвение
+config.day_cycle = День и ночь
+config.chore_progress = Повышение уровня работ
+config.onboarding = Следующий шаг обучения
+config.combat_state = Начало боя и зачистка комнаты
+config.all_sounds = Все звуки
+config.overall_volume = Общая громкость
+config.combat_cues = Боевые звуки
+config.always_on = Постоянные звуки
+config.minigame_cues = Звуки мини-игр
+config.wayfinding_cues = Маяк
+config.all_combat_cues = Все боевые звуки
+config.all_always_on = Все постоянные звуки
+config.all_minigame_cues = Все звуки мини-игр
+config.all_wayfinding_cues = Маяк включён
+config.ambient_budget = Максимум звуков в секунду
+config.cue_on = Включено
+config.cue_volume = Громкость
+config.cue_range = Дальность
+config.cue_repeat = Повтор
+config.cue_max_at_once = Максимум одновременно
+config.play_it = Проиграть
+config.hear_it_move = Услышать движение
+config.guidance_mode = Ведение
+config.mode_beacon_and_speech = маяк и речь
+config.mode_beacon_only = только маяк
+config.mode_speech_only = только речь
+config.beacon_cues = Звук маяка
+config.announce_interval = Повторять ведение каждые
+config.scan_radius = Дальность сканера
+config.enemy_range = Дальность врагов
+config.projectile_horizon = Упреждение предупреждения о снаряде
+config.cooking_lead = Упреждение звука готовки
+config.log_navigation = Записывать навигацию
+config.log_combat = Записывать бой
+config.log_dialogue = Записывать диалоги
+config.log_scan = Записывать кандидатов сканирования
+config.log_bindings = Записывать клавиши игры
+cue.beacon = Маяк
+cue.wall_near = Стена впереди
+cue.wall_blocked = Касание стены
+cue.dodge_direction = Направление уклонения
+cue.dodge_blocked = Уклонение в стену
+cue.melee_threat = Замах в ближнем бою
+cue.projectile_threat = Летящий снаряд
+cue.area_threat = Опасная зона
+cue.static_trap = Неподвижная ловушка
+cue.dodge_avoided_hit = Уклонение спасло от удара
+cue.timing_window = Окно времени открыто
+cue.timing_chirp = Край окна времени
+cue.ambient_wall = Тоны стен
+cue.ambient_item = Предметы
+cue.ambient_interactable = Объекты для взаимодействия
+cue.ambient_npc = Персонажи
+cue.ambient_enemy = Враги
+cue.ambient_projectile = Снаряды в воздухе
+config.cue_update = Частота обновления
+config.sound_folder = Куда класть свои звуки
+config.sound_folder_is = Положите свои звуковые файлы в {0}. Назовите каждый файл по звуку, который он заменяет, с расширением .wav, .ogg или .mp3. Изучение звуков называет имя файла для выбранного звука.
+config.sound_file_name = Имя файла для замены: {0}
+config.wall_notes = Ноты стен
+config.wall_notes_all = все ноты
+config.wall_notes_one = одна нота
+config.wall_notes_two = две ноты
+config.wall_notes_hrtf = три ноты
+config.melee_reaction = Упреждение звука ближнего боя
+config.wall_ring = Направления стен
+config.wall_ring_four = четыре, без диагоналей
+config.wall_ring_eight = восемь, с диагоналями
+config.log_frame_budget = Записывать время кадра

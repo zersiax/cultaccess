@@ -1,0 +1,183 @@
+# CultAccess string catalogue - Arabic
+#
+# STATUS: machine-draft. Translated by the mod's author tooling, NOT yet reviewed by a
+# native speaker. Corrections are welcome and require no rebuild: edit a value below,
+# or delete a line entirely to fall back to English.
+#
+# Known risk in this draft: a few lines name things the game itself also names, such as
+# the Shrine, Devotion and the Sermon. This file guesses those words. If the game uses a
+# different word in Arabic, change it here so the mod matches the rest of the interface.
+#
+#
+# COVERAGE: this draft translates the spoken interface - menu entries, cue names, values
+# and short sentences. The longer explanations that the help key reads out are not
+# translated yet and fall back to English, which is by design rather than an oversight:
+# a partial catalogue is a working catalogue. Adding them needs no rebuild.
+#
+# Keep the {0}, {1} placeholders. Reorder them freely to suit this language.
+# Lines starting with # are comments. Use 
+ for a line break inside a value.
+
+_meta.status = machine-draft
+_meta.translator =
+
+
+# EN: Next step, indoctrinate your new follower
+onboarding.indoctrinate = الخطوة التالية، لقّن أتباعك الجديد
+
+# EN: Next step, go to the indoctrination platform and indoctrinate your new follower
+onboarding.indoctrinate_at_platform = الخطوة التالية، اذهب إلى منصة التلقين ولقّن أتباعك الجديد
+
+# EN: Next step, build a Shrine
+onboarding.shrine = الخطوة التالية، ابنِ مزارًا
+
+# EN: Next step, command a follower to worship at the Shrine, then collect Devotion
+onboarding.devotion = الخطوة التالية، اطلب من أحد الأتباع الصلاة عند المزار ثم اجمع التفاني
+
+# EN: Next step, {0}
+onboarding.unknown = الخطوة التالية، {0}
+
+# EN: Day {0}.
+day.new = اليوم {0}.
+
+# EN: Day {0}. {1} available.
+day.new_with_restored = اليوم {0}. {1} متاح.
+
+# EN: Night falls.
+day.nightfall = حل الليل.
+
+# EN: Day {0}, {1}
+day.status = اليوم {0}، {1}
+
+# EN: Day {0}, {1}, about {2} until {3}
+day.status_with_countdown = اليوم {0}، {1}، نحو {2} حتى {3}
+
+# EN: {0} second
+duration.second = {0} ثانية
+
+# EN: {0} seconds
+duration.seconds = {0} ثانية
+
+# EN: {0}, entrance, walk in without pressing Interact
+entrance.open = {0}، مدخل، ادخل دون الضغط على زر التفاعل
+
+# EN: {0}, entrance, blocked
+entrance.blocked = {0}، مدخل، مسدود
+
+# EN: At {0}. Walk into the doorway to go inside.
+entrance.arrival_open = عند {0}. اعبر المدخل للدخول.
+
+# EN: Reached {0}. The doorway is blocked.
+entrance.arrival_blocked = وصلت إلى {0}. المدخل مسدود.
+
+# EN: requires {0} follower; you have {1}
+dungeon_door.requirement_one = يتطلب {0} تابعًا؛ لديك {1}
+
+# EN: requires {0} followers; you have {1}
+dungeon_door.requirement_many = يتطلب {0} أتباع؛ لديك {1}
+
+
+# Settings menu, sound cues and the spoken values they use.
+config.title = إعدادات CultAccess
+config.item = عنصر
+config.submenu = قائمة فرعية
+config.on = مُفعّل
+config.off = مُعطّل
+config.percent = {0} بالمئة
+config.metres = {0} متر
+config.seconds = {0} ثانية
+config.per_second = {0} في الثانية
+config.page_empty = {0}. لا يوجد شيء لتغييره هنا.
+config.page_items_one = عنصر واحد
+config.page_items_many = {0} عناصر
+config.closed = أُغلقت الإعدادات.
+config.nothing_to_do = لا يوجد ما تفعله في هذا العنصر.
+config.no_detail = لا يوجد شرح إضافي لهذا العنصر.
+config.currently_silent = صامت حاليًا، لأن مفتاحًا أعلاه مُعطّل
+config.controls = الأعلى والأسفل ينقلان التحديد. اليسار واليمين يغيّران القيمة. مفتاح الإدخال يفتح قسمًا أو ينفّذ إجراءً. مفتاح المسافة للخلف يرجع، ويغلق القائمة من المستوى الأعلى. {0} يغلقها من أي مكان. اللعبة تستمر في العمل، لذا افتح هذا عندما تكون في أمان.
+config.speech = النطق
+config.sounds = الأصوات
+config.wayfinding = تحديد الاتجاه
+config.learn_sounds = تعلّم الأصوات
+config.diagnostics = التشخيص
+config.speech_enabled = النطق
+config.verbosity = مستوى التفصيل
+config.verbosity_low = منخفض
+config.verbosity_normal = عادي
+config.verbosity_diagnostic = تشخيصي
+config.braille = برايل
+config.menu_context = أسماء القوائم
+config.auto_read_panels = قراءة اللوحات تلقائيًا
+config.interaction_prompts = تنبيهات التفاعل
+config.notifications = الإشعارات
+config.barks = عبارات الأتباع
+config.player_state = الصحة والحماس
+config.day_cycle = النهار والليل
+config.chore_progress = مستويات المهام
+config.onboarding = الخطوة التالية في التعليم
+config.combat_state = بداية القتال وخلو الغرفة
+config.all_sounds = كل الأصوات
+config.overall_volume = مستوى الصوت العام
+config.combat_cues = أصوات القتال
+config.always_on = الأصوات المستمرة
+config.minigame_cues = أصوات الألعاب المصغّرة
+config.wayfinding_cues = المنارة
+config.all_combat_cues = كل أصوات القتال
+config.all_always_on = كل الأصوات المستمرة
+config.all_minigame_cues = كل أصوات الألعاب المصغّرة
+config.all_wayfinding_cues = المنارة مُفعّلة
+config.ambient_budget = أقصى عدد أصوات في الثانية
+config.cue_on = مُفعّل
+config.cue_volume = مستوى الصوت
+config.cue_range = المدى
+config.cue_repeat = التكرار
+config.cue_max_at_once = أقصى عدد في وقت واحد
+config.play_it = تشغيله
+config.hear_it_move = استمع إليه وهو يتحرك
+config.guidance_mode = التوجيه
+config.mode_beacon_and_speech = المنارة والنطق
+config.mode_beacon_only = المنارة فقط
+config.mode_speech_only = النطق فقط
+config.beacon_cues = صوت المنارة
+config.announce_interval = تكرار التوجيه كل
+config.scan_radius = مدى الماسح
+config.enemy_range = مدى الأعداء
+config.projectile_horizon = مهلة التحذير من المقذوفات
+config.cooking_lead = مهلة صوت الطهي
+config.log_navigation = تسجيل التنقل
+config.log_combat = تسجيل القتال
+config.log_dialogue = تسجيل الحوارات
+config.log_scan = تسجيل مرشحي المسح
+config.log_bindings = تسجيل مفاتيح اللعبة
+cue.beacon = المنارة
+cue.wall_near = جدار في الأمام
+cue.wall_blocked = ملامسة الجدار
+cue.dodge_direction = اتجاه المراوغة
+cue.dodge_blocked = مراوغة نحو جدار
+cue.melee_threat = تحضير ضربة التحام
+cue.projectile_threat = طلقة قادمة
+cue.area_threat = منطقة خطرة
+cue.static_trap = فخ ثابت
+cue.dodge_avoided_hit = المراوغة تفادت ضربة
+cue.timing_window = نافذة التوقيت مفتوحة
+cue.timing_chirp = حافة نافذة التوقيت
+cue.ambient_wall = نغمات الجدران
+cue.ambient_item = الأغراض
+cue.ambient_interactable = أشياء قابلة للاستخدام
+cue.ambient_npc = الشخصيات
+cue.ambient_enemy = الأعداء
+cue.ambient_projectile = مقذوفات في الهواء
+config.cue_update = معدل التحديث
+config.sound_folder = أين تضع أصواتك الخاصة
+config.sound_folder_is = ضع ملفاتك الصوتية في {0}. سمِّ كل ملف باسم الصوت الذي يستبدله، وينتهي بـ .wav أو .ogg أو .mp3. قسم تعلّم الأصوات يذكر اسم ملف الصوت الذي أنت عليه.
+config.sound_file_name = اسم ملف الاستبدال: {0}
+config.wall_notes = نغمات الجدران
+config.wall_notes_all = كل النغمات
+config.wall_notes_one = نغمة واحدة
+config.wall_notes_two = نغمتان
+config.wall_notes_hrtf = ثلاث نغمات
+config.melee_reaction = مهلة صوت الالتحام
+config.wall_ring = اتجاهات الجدران
+config.wall_ring_four = أربعة، بدون أقطار
+config.wall_ring_eight = ثمانية، مع الأقطار
+config.log_frame_budget = تسجيل أزمنة الإطارات
