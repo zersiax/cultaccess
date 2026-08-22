@@ -160,10 +160,10 @@ $manual.Add_Click({
         Add-Status 'ERR_SSL_PROTOCOL_ERROR, that is your security software inspecting encrypted'
         Add-Status 'traffic, not a problem with the file. The download itself is served from'
         Add-Status 'gcdn.thunderstore.io, so that is the name to allow.'
-        Add-Status 'Three things that work, easiest first: press Install instead and let this'
-        Add-Status 'installer fetch it, since it does not go through your browser; add'
-        Add-Status 'thunderstore.io and gcdn.thunderstore.io to your security software as'
-        Add-Status 'exclusions; or turn its web or HTTPS scanning off for a minute.'
+        Add-Status 'Add both thunderstore.io and gcdn.thunderstore.io to your security'
+        Add-Status 'software as exclusions, or turn its web or HTTPS scanning off for a minute.'
+        Add-Status 'Allowing only the first name is not enough: the link redirects to the second,'
+        Add-Status 'and that is where the file comes from.'
         try { Start-Process $link } catch { Add-Status 'Could not open a browser. Paste the link above instead.' }
 
         $prompt = [System.Windows.Forms.MessageBox]::Show(

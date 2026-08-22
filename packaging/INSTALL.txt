@@ -24,17 +24,21 @@ IF YOUR ANTIVIRUS BLOCKS THE BEPINEX DOWNLOAD
 Some antivirus products flag it. Nothing is wrong with the file; a mod loader
 patches a game, which is the same shape as something unwanted doing it.
 
-First, just press Install and let the installer fetch it. The installer does not
-go through your browser, so a browser-level block often does not affect it.
+The fix is to let the download through, and the name to allow is
+gcdn.thunderstore.io. That is the server the file actually comes from; the link
+starts at thunderstore.io and redirects there, so allowing only the first name is
+not enough. Add both as exclusions, or turn off your security software's web or
+HTTPS scanning for a minute.
 
 If your browser reports ERR_SSL_PROTOCOL_ERROR or "the connection is not secure"
-on the download link, that is your security software inspecting encrypted
-traffic, not a problem with the file. The download is served from
-gcdn.thunderstore.io; allowing that name, or turning off web/HTTPS scanning for a
-minute, gets you through.
+on that link, nothing is wrong with the file. Your security software is
+inspecting encrypted traffic and the inspection is what fails.
 
-If you would rather fetch it yourself, use the second button, "Use a BepInEx zip
-I downloaded myself". It looks up the current download link, copies it to your clipboard and
+The installer's own download and your browser's can fail separately, because they
+take different routes. If only the browser is affected, press Install and let the
+installer fetch it. If only the installer is affected, fetch the zip in your
+browser and use the second button, "Use a BepInEx zip I downloaded myself". If
+both fail, it is the exclusions above that you need. It looks up the current download link, copies it to your clipboard and
 opens it in your browser, then waits. Download the zip however suits you - allow
 it in your antivirus, or use a different browser - and when it has finished,
 answer Yes and pick the file you saved. The installer takes it from there.
