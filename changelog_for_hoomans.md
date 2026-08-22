@@ -2,6 +2,10 @@
 
 What is this world coming to that we split these up. Anyway:
 
+## 0.1.1: Installer hotfix
+
+- Some antivirus products flag the BepInEx download. There is now a second button in the installer, "Use a BepInEx zip I downloaded myself", which hands you the current link, waits while you fetch it however you like, and then lets you pick the file. Nothing is wrong with BepInEx; a mod loader patches a game, which looks the same as something unwanted doing it.
+
 ## 0.1.0: Initial release
 
 - A lot of menus already read: title, pause, follower indoctrination, tarrot cards, temple, rituals, upgrade trees for divine inspiration, building screen, cooking screen, travel map, etc.

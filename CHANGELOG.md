@@ -11,7 +11,7 @@ Game version tested against throughout: **Cult of the Lamb 1.5.25.1049** (Steam)
 
 ---
 
-## [Unreleased]
+## [0.1.1] — 2026-08-22
 
 ### Added
 
