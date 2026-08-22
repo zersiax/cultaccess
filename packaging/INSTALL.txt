@@ -24,8 +24,17 @@ IF YOUR ANTIVIRUS BLOCKS THE BEPINEX DOWNLOAD
 Some antivirus products flag it. Nothing is wrong with the file; a mod loader
 patches a game, which is the same shape as something unwanted doing it.
 
-In the installer, use the second button, "Use a BepInEx zip I downloaded
-myself". It looks up the current download link, copies it to your clipboard and
+First, just press Install and let the installer fetch it. The installer does not
+go through your browser, so a browser-level block often does not affect it.
+
+If your browser reports ERR_SSL_PROTOCOL_ERROR or "the connection is not secure"
+on the download link, that is your security software inspecting encrypted
+traffic, not a problem with the file. The download is served from
+gcdn.thunderstore.io; allowing that name, or turning off web/HTTPS scanning for a
+minute, gets you through.
+
+If you would rather fetch it yourself, use the second button, "Use a BepInEx zip
+I downloaded myself". It looks up the current download link, copies it to your clipboard and
 opens it in your browser, then waits. Download the zip however suits you - allow
 it in your antivirus, or use a different browser - and when it has finished,
 answer Yes and pick the file you saved. The installer takes it from there.
