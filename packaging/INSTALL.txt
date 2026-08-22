@@ -18,6 +18,19 @@ The NVDA bridge library is included, so you do not need to hunt for it separatel
 Tolk is supported if you already have it, but is not included.
 
 
+IF YOUR ANTIVIRUS BLOCKS THE BEPINEX DOWNLOAD
+---------------------------------------------
+
+Some antivirus products flag it. Nothing is wrong with the file; a mod loader
+patches a game, which is the same shape as something unwanted doing it.
+
+In the installer, use the second button, "Use a BepInEx zip I downloaded
+myself". It looks up the current download link, copies it to your clipboard and
+opens it in your browser, then waits. Download the zip however suits you - allow
+it in your antivirus, or use a different browser - and when it has finished,
+answer Yes and pick the file you saved. The installer takes it from there.
+
+
 EASIEST INSTALL
 ---------------
 

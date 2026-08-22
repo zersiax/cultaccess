@@ -11,6 +11,17 @@ Game version tested against throughout: **Cult of the Lamb 1.5.25.1049** (Steam)
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- A second installer button, "Use a BepInEx zip I downloaded myself", for anyone whose
+  antivirus blocks the automatic download — which is happening in practice, since a mod
+  loader patches a game and that is the same shape as something unwanted doing it. It
+  resolves the current download link live from Thunderstore rather than carrying a written-down
+  one, copies it to the clipboard, opens it in a browser, then waits and offers a file picker
+  for the zip once it has been saved. Falls back to the package page if the lookup fails.
+
 ## [0.1.0] — 2026-08-21
 
 ### Fixed

@@ -125,6 +125,36 @@ function Test-BepInExInstalled([string] $GameDir) {
     The version is resolved from the Thunderstore API rather than hardcoded, so this keeps
     working when BepInEx updates.
 #>
+<#
+.SYNOPSIS
+    The current direct download URL for the BepInEx pack, and its version.
+
+.DESCRIPTION
+    Resolved live from Thunderstore rather than written down. A hardcoded link is how the
+    wrong one reached testers once already, and a link that is correct today is only correct
+    until the next release.
+
+    Returns $null when the lookup fails, so a caller can offer the package page instead of a
+    guess. Never throws: this exists to help someone whose download was blocked, and failing
+    loudly at them a second time helps nobody.
+#>
+function Get-BepInExDownload {
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        $api = 'https://thunderstore.io/api/experimental/package/BepInEx/BepInExPack_CultOfTheLamb/'
+        $info = Invoke-RestMethod -Uri $api -TimeoutSec 30
+        if (-not $info.latest.download_url) { return $null }
+
+        return [pscustomobject]@{
+            Url     = $info.latest.download_url
+            Version = $info.latest.version_number
+        }
+    }
+    catch {
+        return $null
+    }
+}
+
 function Install-BepInEx {
     param([Parameter(Mandatory = $true)] [string] $GameDir, [string] $FromZip)
 

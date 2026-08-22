@@ -26,7 +26,7 @@ $form.FormBorderStyle = 'FixedDialog'
 $form.MaximizeBox = $false
 
 $intro = New-Object System.Windows.Forms.Label
-$intro.Text = 'This installs the CultAccess screen reader mod for Cult of the Lamb. It will download BepInEx automatically if it is not already installed.'
+$intro.Text = 'This installs the CultAccess screen reader mod for Cult of the Lamb. It will download BepInEx automatically if it is not already installed. If that download is blocked, use the second button to fetch it yourself.'
 $intro.Location = New-Object System.Drawing.Point(12, 12)
 $intro.Size = New-Object System.Drawing.Size(580, 40)
 $form.Controls.Add($intro)
@@ -58,6 +58,17 @@ $install.Size = New-Object System.Drawing.Size(140, 32)
 $install.AccessibleName = 'Install CultAccess'
 $form.Controls.Add($install)
 $form.AcceptButton = $install
+
+# Separate from Install rather than a fallback inside it. A tester whose antivirus blocks the
+# download needs to know the manual route exists *before* they hit the failure, not after, and
+# a button they can tab to is discoverable in a way a log line is not.
+$manual = New-Object System.Windows.Forms.Button
+$manual.Text = 'Use a BepInEx zip I &downloaded myself...'
+$manual.Location = New-Object System.Drawing.Point(162, 118)
+$manual.Size = New-Object System.Drawing.Size(300, 32)
+$manual.AccessibleName = 'Use a BepInEx zip I downloaded myself'
+$manual.AccessibleDescription = 'Shows the download link, then lets you pick the zip you saved'
+$form.Controls.Add($manual)
 
 $statusLabel = New-Object System.Windows.Forms.Label
 $statusLabel.Text = 'Pro&gress:'
@@ -101,9 +112,117 @@ $browse.Add_Click({
 
 $close.Add_Click({ $form.Close() })
 
+<#
+    Guides someone whose automatic download was blocked - by antivirus, a proxy, or a
+    corporate network - through fetching the zip by hand.
+
+    The link is resolved live rather than written into this file. A hardcoded link is how the
+    wrong one reached testers once already, and it would be stale by the next BepInEx release
+    regardless. If the lookup fails, the package page is offered instead, which is a page a
+    human can navigate rather than a guess at a file name.
+
+    The URL is put on the clipboard and read into the progress box as well as opened in a
+    browser, because a browser that opens behind the installer is invisible to a screen reader
+    user, and because pasting it into a different browser is often the actual fix.
+#>
+$manual.Add_Click({
+    $game = $pathBox.Text.Trim()
+    if (-not (Test-GameFolder $game)) {
+        Add-Status 'Set the game folder first, with Browse, then try this again.'
+        $status.Focus() | Out-Null
+        return
+    }
+
+    $manual.Enabled = $false
+    $install.Enabled = $false
+    try {
+        Add-Status ''
+        Add-Status 'Looking up the current BepInEx download link...'
+        $download = Get-BepInExDownload
+
+        if ($download) {
+            $link = $download.Url
+            $what = 'BepInEx ' + $download.Version
+        }
+        else {
+            $link = 'https://thunderstore.io/c/cult-of-the-lamb/p/BepInEx/BepInExPack_CultOfTheLamb/'
+            $what = 'the BepInEx pack page'
+        }
+
+        try { Set-Clipboard -Value $link } catch { }
+        Add-Status ('Link to ' + $what + ', also copied to your clipboard:')
+        Add-Status $link
+        Add-Status ''
+        Add-Status 'Opening it in your browser. If your antivirus blocks the download, allow it'
+        Add-Status 'or try another browser, then come back here.'
+        try { Start-Process $link } catch { Add-Status 'Could not open a browser. Paste the link above instead.' }
+
+        $prompt = [System.Windows.Forms.MessageBox]::Show(
+            'The download link is on your clipboard and open in your browser.' + [Environment]::NewLine + [Environment]::NewLine +
+            'Download the zip, then choose Yes to pick the file you saved.' + [Environment]::NewLine +
+            'Choose No to stop here.',
+            'Download BepInEx',
+            [System.Windows.Forms.MessageBoxButtons]::YesNo,
+            [System.Windows.Forms.MessageBoxIcon]::Information)
+
+        if ($prompt -ne [System.Windows.Forms.DialogResult]::Yes) {
+            Add-Status 'Stopped. Press this button again when the download has finished.'
+            $status.Focus() | Out-Null
+            return
+        }
+
+        $dialog = New-Object System.Windows.Forms.OpenFileDialog
+        $dialog.Title = 'Select the BepInEx zip you downloaded'
+        $dialog.Filter = 'Zip archives (*.zip)|*.zip|All files (*.*)|*.*'
+        $downloads = Join-Path $env:USERPROFILE 'Downloads'
+        if (Test-Path $downloads) { $dialog.InitialDirectory = $downloads }
+
+        if ($dialog.ShowDialog() -ne [System.Windows.Forms.DialogResult]::OK) {
+            Add-Status 'No file chosen. Press this button again when you are ready.'
+            $status.Focus() | Out-Null
+            return
+        }
+
+        if (Test-GameRunning) {
+            Add-Status 'Cult of the Lamb is running. Close the game completely, then try again.'
+            $status.Focus() | Out-Null
+            return
+        }
+
+        Add-Status ''
+        Install-BepInEx -GameDir $game -FromZip $dialog.FileName
+
+        $packageRoot = Resolve-PackageRoot $here
+        if (-not $packageRoot) {
+            Add-Status 'BepInEx is in. Could not find the plugins folder, though: extract the whole'
+            Add-Status 'zip and keep its folders together, then press Install.'
+            $status.Focus() | Out-Null
+            return
+        }
+
+        Install-CultAccess -GameDir $game -PackageDir $packageRoot | Out-Null
+
+        Add-Status ''
+        Add-Status 'Done. CultAccess is installed.'
+        Add-Status 'Start the game; you should hear "Cult Access loaded" within a few seconds.'
+        Add-Status 'Press F1 in game for the full key list, and F7 to mark the log when something is not announced.'
+        $status.Focus() | Out-Null
+    }
+    catch {
+        Add-Status ''
+        Add-Status ('Install failed: ' + (Get-FriendlyInstallError $_.Exception))
+        $status.Focus() | Out-Null
+    }
+    finally {
+        $manual.Enabled = $true
+        $install.Enabled = $true
+    }
+})
+
 $install.Add_Click({
     $install.Enabled = $false
     $browse.Enabled = $false
+    $manual.Enabled = $false
     try {
         $game = $pathBox.Text.Trim()
         if (-not (Test-GameFolder $game)) {
@@ -154,6 +273,7 @@ $install.Add_Click({
     finally {
         $install.Enabled = $true
         $browse.Enabled = $true
+        $manual.Enabled = $true
     }
 })
 
