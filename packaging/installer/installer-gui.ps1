@@ -155,6 +155,11 @@ $manual.Add_Click({
         Add-Status ''
         Add-Status 'Opening it in your browser. If your antivirus blocks the download, allow it'
         Add-Status 'or try another browser, then come back here.'
+        Add-Status ''
+        Add-Status 'If the browser reports a certificate or SSL error on this link, that is your'
+        Add-Status 'security software inspecting encrypted traffic rather than a problem with the'
+        Add-Status 'file. Turning off its web or HTTPS scanning for a moment, or using a browser'
+        Add-Status 'it does not hook, will get you the download.'
         try { Start-Process $link } catch { Add-Status 'Could not open a browser. Paste the link above instead.' }
 
         $prompt = [System.Windows.Forms.MessageBox]::Show(

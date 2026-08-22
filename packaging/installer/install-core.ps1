@@ -127,6 +127,37 @@ function Test-BepInExInstalled([string] $GameDir) {
 #>
 <#
 .SYNOPSIS
+    Make sure TLS can negotiate, without narrowing what the OS already allows.
+
+.DESCRIPTION
+    This used to be a bare assignment of Tls12, which is worse than it looks. Assigning
+    replaces the whole set rather than adding to it, and the default on a current Windows is
+    SystemDefault, meaning "let the OS choose" — including TLS 1.3. Forcing 1.2 therefore
+    *downgraded* a healthy machine, and a downgrade is exactly the kind of thing an
+    HTTPS-inspecting antivirus or proxy turns into a handshake failure.
+
+    So SystemDefault is left alone, and anything else has the modern protocols added rather
+    than substituted.
+#>
+function Initialize-Tls {
+    try {
+        $current = [Net.ServicePointManager]::SecurityProtocol
+        if ($current -eq [Net.SecurityProtocolType]::SystemDefault) { return }
+
+        $wanted = $current -bor [Net.SecurityProtocolType]::Tls12
+        if ([enum]::GetNames([Net.SecurityProtocolType]) -contains 'Tls13') {
+            $wanted = $wanted -bor [Net.SecurityProtocolType]::Tls13
+        }
+
+        [Net.ServicePointManager]::SecurityProtocol = $wanted
+    }
+    catch {
+        # An old runtime without the newer members. Whatever is configured has to do.
+    }
+}
+
+<#
+.SYNOPSIS
     The current direct download URL for the BepInEx pack, and its version.
 
 .DESCRIPTION
@@ -140,7 +171,7 @@ function Test-BepInExInstalled([string] $GameDir) {
 #>
 function Get-BepInExDownload {
     try {
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Initialize-Tls
         $api = 'https://thunderstore.io/api/experimental/package/BepInEx/BepInExPack_CultOfTheLamb/'
         $info = Invoke-RestMethod -Uri $api -TimeoutSec 30
         if (-not $info.latest.download_url) { return $null }
@@ -151,6 +182,10 @@ function Get-BepInExDownload {
         }
     }
     catch {
+        # Reported, not swallowed. The first version returned $null on any failure, so a TLS
+        # or proxy problem looked identical to "no link available" and left nobody able to
+        # say which. The caller still gets $null and still falls back to the package page.
+        Report ('Could not reach Thunderstore: ' + $_.Exception.Message)
         return $null
     }
 }
@@ -165,7 +200,7 @@ function Install-BepInEx {
     try {
         if (-not $zip) {
             Report 'Looking up the current BepInEx version...'
-            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            Initialize-Tls
 
             # The Cult of the Lamb pack, NOT the generic BepInExPack. They differ in one
             # decisive way: the generic pack hooks UnityEngine.CoreModule's

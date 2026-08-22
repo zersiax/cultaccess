@@ -11,6 +11,25 @@ Game version tested against throughout: **Cult of the Lamb 1.5.25.1049** (Steam)
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+- The installer narrowed TLS instead of widening it. Both network calls assigned
+  `SecurityProtocol = Tls12`, and assignment replaces the set rather than adding to it — so on
+  a current Windows, where the default is `SystemDefault` and the OS may negotiate TLS 1.3, the
+  installer actively downgraded a healthy machine. A downgrade is exactly what an
+  HTTPS-inspecting antivirus or proxy turns into a handshake failure. `SystemDefault` is now
+  left alone, and anything else has the modern protocols added rather than substituted.
+- A failed Thunderstore lookup returned nothing and said nothing, so a TLS or proxy problem
+  was indistinguishable from "no link available". The reason is now reported into the progress
+  box; the fallback to the package page is unchanged.
+
+### Added
+
+- Guidance in the installer for certificate and SSL errors on the download link, which are
+  the security software inspecting encrypted traffic rather than a problem with the file.
+
 ## [0.1.1] — 2026-08-22
 
 ### Added
