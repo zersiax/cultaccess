@@ -24,8 +24,17 @@ IF YOUR ANTIVIRUS BLOCKS THE BEPINEX DOWNLOAD
 Some antivirus products flag it. Nothing is wrong with the file; a mod loader
 patches a game, which is the same shape as something unwanted doing it.
 
-The fix is to let the download through, and the name to allow is
-gcdn.thunderstore.io. That is the server the file actually comes from; the link
+Check your security software's own block log first - in Malwarebytes that is
+Detection History, then Reports. A blocked website is listed there by name, and
+allowing it from that entry is the whole fix. That is better than turning
+protection off, and it tells you for certain that blocking is what happened.
+
+Two signs that it is a block rather than anything wrong with the file: Chrome
+says ERR_SSL_PROTOCOL_ERROR, and Firefox says "SSL received a record that
+exceeded the maximum permissible length". Both mean the reply was not encrypted
+traffic at all, which is what a block page looks like on a secure connection.
+
+The name to allow is gcdn.thunderstore.io. That is the server the file actually comes from; the link
 starts at thunderstore.io and redirects there, so allowing only the first name is
 not enough. Add both as exclusions, or turn off your security software's web or
 HTTPS scanning for a minute.
