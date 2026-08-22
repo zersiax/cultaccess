@@ -4,6 +4,8 @@ What is this world coming to that we split these up. Anyway:
 
 ## 0.1.1: Installer hotfix
 
+- The installer would not start if you unpacked it somewhere with a space in the path, like C:\games\cult of the lamb. Fixed.
+
 - Some antivirus products flag the BepInEx download. There is now a second button in the installer, "Use a BepInEx zip I downloaded myself", which hands you the current link, waits while you fetch it however you like, and then lets you pick the file. Nothing is wrong with BepInEx; a mod loader patches a game, which looks the same as something unwanted doing it.
 
 ## 0.1.0: Initial release

@@ -11,7 +11,7 @@ Game version tested against throughout: **Cult of the Lamb 1.5.25.1049** (Steam)
 
 ---
 
-## [Unreleased]
+## [0.1.1] — 2026-08-22
 
 ### Fixed
 
@@ -35,10 +35,6 @@ Game version tested against throughout: **Cult of the Lamb 1.5.25.1049** (Steam)
 
 - Guidance in the installer for certificate and SSL errors on the download link, which are
   the security software inspecting encrypted traffic rather than a problem with the file.
-
-## [0.1.1] — 2026-08-22
-
-### Added
 
 - A second installer button, "Use a BepInEx zip I downloaded myself", for anyone whose
   antivirus blocks the automatic download — which is happening in practice, since a mod
