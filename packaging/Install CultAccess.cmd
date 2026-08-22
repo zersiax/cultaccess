@@ -15,7 +15,10 @@ if not exist "%SCRIPT%" (
 net session >nul 2>&1
 if %errorlevel%==0 goto run
 
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','%SCRIPT%'"
+rem The path must carry its own quotes. Start-Process joins ArgumentList with spaces into
+rem one command line, so an unquoted path under, say, C:\games\cult of the lamb\ arrives at
+rem the elevated PowerShell as -File C:\games\cult and the installer never starts.
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process powershell -Verb RunAs -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','\"%SCRIPT%\"'"
 goto :eof
 
 :run

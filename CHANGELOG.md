@@ -15,6 +15,12 @@ Game version tested against throughout: **Cult of the Lamb 1.5.25.1049** (Steam)
 
 ### Fixed
 
+- The installer failed to start when unpacked to a path containing spaces, such as
+  `C:\games\cult of the lamb\`. `Start-Process` joins its argument list with spaces into one
+  command line, so an unquoted script path arrived at the elevated PowerShell as
+  `-File C:\games\cult` and nothing ran. Only the self-elevation branch was affected; the
+  already-elevated path was correctly quoted.
+
 - The installer narrowed TLS instead of widening it. Both network calls assigned
   `SecurityProtocol = Tls12`, and assignment replaces the set rather than adding to it — so on
   a current Windows, where the default is `SystemDefault` and the OS may negotiate TLS 1.3, the
