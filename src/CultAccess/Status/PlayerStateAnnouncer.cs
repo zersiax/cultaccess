@@ -17,6 +17,17 @@ namespace CultAccess.Status
             public HealthPlayer Target;
             public HealthSnapshot Before;
             public float DueAt;
+
+            /// <summary>
+            /// Set when something arrived that the combat rate limit must not sit on.
+            ///
+            /// The limit folds changes together for up to two and a half seconds, and a fold
+            /// reports the net. A blue heart picked up while a drop was waiting therefore
+            /// cancelled out against it and the pair was announced as nothing at all — the
+            /// player heard silence where they had just gained a heart. Deferring is only
+            /// acceptable while every change in the window is more of the same.
+            /// </summary>
+            public bool NeverDefer;
         }
 
         private sealed class PendingFervourChange
@@ -29,6 +40,30 @@ namespace CultAccess.Status
         // Damage and heart effects frequently update several heart pools in one call.
         // Waiting for the same quiet interval used by objective changes produces one final read.
         private const float SettleSeconds = 0.35f;
+
+        /// <summary>
+        /// Minimum gap between spoken health drops while a fight is running.
+        ///
+        /// The settle window above coalesces one damage event, not a fight. In the room where
+        /// a run ended, nine separate "Health dropped to..." lines went out at interrupting
+        /// priority inside about forty seconds, plus three fervour lines — a screen reader
+        /// talking continuously over the only cues that could have saved the run, all of it
+        /// reporting a number the player could ask for at any time.
+        ///
+        /// Deferring rather than dropping: the pending entry is pushed out instead of
+        /// removed, so nothing is lost and the sentence that eventually goes out carries the
+        /// current total rather than a backlog of stale ones.
+        /// </summary>
+        private const float CombatHealthInterval = 2.5f;
+
+        /// <summary>
+        /// Health at or below one heart, in the game's units of two HP per heart, always
+        /// speaks immediately. That is the reading a player changes their behaviour on, and
+        /// it is the one moment where interrupting a cue is the right trade.
+        /// </summary>
+        private const float CriticalHealth = 2f;
+
+        private static float _lastCombatHealthAt = float.NegativeInfinity;
 
         private static readonly Dictionary<HealthPlayer, PendingHealthChange> PendingHealth =
             new Dictionary<HealthPlayer, PendingHealthChange>();
@@ -85,6 +120,11 @@ namespace CultAccess.Status
             if (PendingHealth.TryGetValue(health, out var pending))
             {
                 pending.DueAt = Time.unscaledTime + SettleSeconds;
+
+                // Anything that is not a further drop stops this being deferrable. Gains and
+                // capacity changes are rare, always worth hearing, and are exactly what a
+                // netting fold would erase.
+                if (!(after.Current < before.Current)) pending.NeverDefer = true;
                 return;
             }
 
@@ -169,6 +209,30 @@ namespace CultAccess.Status
                 var spoken = PlayerStatusText.HealthChange(pending.Before, after);
                 if (spoken.Length == 0) continue;
 
+                var dropped = after.Current < pending.Before.Current;
+                if (dropped && !pending.NeverDefer && Combat.CombatLifecycle.InCombat &&
+                    after.Current > CriticalHealth &&
+                    Time.unscaledTime - _lastCombatHealthAt < CombatHealthInterval)
+                {
+                    // Put it back rather than discard it. Further hits fold into the same
+                    // entry, and when it does go out it states where the health actually is.
+                    pending.DueAt = _lastCombatHealthAt + CombatHealthInterval;
+                    PendingHealth[key] = pending;
+
+                    // Logged, because a deferral that leaves no trace is indistinguishable in
+                    // a session log from a limiter that never fired — which is exactly the
+                    // question the last log could not answer about this code.
+                    Plugin.Log.LogInfo(
+                        $"[player state] health deferred to={after.Current:0.##}/{after.Capacity:0.##} " +
+                        $"sinceLast={Time.unscaledTime - _lastCombatHealthAt:0.00}s");
+                    continue;
+                }
+
+                // Only combat drops arm the limiter, so a quiet-world scratch
+                // cannot defer the first real report of the next fight.
+                if (dropped && Combat.CombatLifecycle.InCombat)
+                    _lastCombatHealthAt = Time.unscaledTime;
+
                 spoken = WithPlayer(target.playerFarming, spoken);
                 Plugin.Log.LogInfo(
                     $"[player state] type=health player={PlayerName(target.playerFarming)} " +
@@ -230,7 +294,15 @@ namespace CultAccess.Status
             var time = DayCycleAnnouncer.CurrentStatus();
             var step = OnboardingTracker.CurrentStep();
 
-            Speaker.SayParts(SpeechPriority.Now, health, fervour, tarot, time, step);
+            // Only ever a few words, and only when a cult bar is actually low. The full
+            // four-bar reading has its own key precisely because this one is already long
+            // and is pressed constantly; what belongs here is the fact that something is
+            // wrong, which a sighted player has on screen the whole time.
+            var cult = Plugin.AnnounceCultInWhereAmI.Value
+                ? CultStatusAnnouncer.AlertClause()
+                : string.Empty;
+
+            Speaker.SayParts(SpeechPriority.Now, health, fervour, tarot, time, step, cult);
         }
 
         internal static void Shutdown()

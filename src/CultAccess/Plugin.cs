@@ -3,13 +3,14 @@ using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using CultAccess.Input;
 using CultAccess.Speech;
 using HarmonyLib;
 using UnityEngine;
 
 namespace CultAccess
 {
-    [BepInPlugin(Guid, "CultAccess", "0.1.1")]
+    [BepInPlugin(Guid, "CultAccess", "0.2.2")]
     public class Plugin : BaseUnityPlugin
     {
         public const string Guid = "dev.cultaccess";
@@ -40,10 +41,19 @@ namespace CultAccess
         internal static ConfigEntry<bool> LogDialogue;
         internal static ConfigEntry<bool> LogFocus;
         internal static ConfigEntry<bool> LogSpeech;
+        internal static ConfigEntry<bool> LogCueAudio;
+        internal static ConfigEntry<bool> LogCurseAim;
+        internal static ConfigEntry<bool> LogSilentSequences;
+        internal static ConfigEntry<bool> AnnounceMapReveals;
+        internal static ConfigEntry<bool> AnnounceChainBreaks;
+        internal static ConfigEntry<bool> WarnOnNonStereoOutput;
+        internal static ConfigEntry<bool> ControllerLayerEnabled;
+        internal static ConfigEntry<bool> FocusEnemiesInCombat;
         internal static ConfigEntry<bool> LogGameBindings;
         internal static ConfigEntry<bool> LogScanCandidates;
         internal static ConfigEntry<bool> LogNavigation;
         internal static ConfigEntry<bool> LogFrameBudget;
+        internal static ConfigEntry<bool> LogFollowerWheel;
 
         /// <summary>Rewired is not ready during Awake, so the binding dump waits a moment.</summary>
         private float _bindingDumpAt;
@@ -55,6 +65,11 @@ namespace CultAccess
         internal static ConfigEntry<KeyCode> KeyReadPanel;
         internal static ConfigEntry<KeyCode> KeyLogMarker;
         internal static ConfigEntry<KeyCode> KeyNearestValidCell;
+        internal static ConfigEntry<KeyCode> KeyCultStatus;
+        internal static ConfigEntry<KeyCode> KeyFollowerStatus;
+        internal static ConfigEntry<bool> AnnounceCultStatus;
+        internal static ConfigEntry<bool> AnnounceCultInWhereAmI;
+        internal static ConfigEntry<bool> AnnounceFollowerRequests;
         internal static ConfigEntry<bool> AutoReadPanels;
         internal static ConfigEntry<KeyCode> KeyNextTarget;
         internal static ConfigEntry<KeyCode> KeyPrevTarget;
@@ -70,6 +85,8 @@ namespace CultAccess
         internal static ConfigEntry<float> EnemyRange;
         internal static ConfigEntry<KeyCode> KeyTrack;
         internal static ConfigEntry<KeyCode> KeyWhereIsIt;
+        internal static ConfigEntry<KeyCode> KeyAutowalk;
+        internal static ConfigEntry<bool> AutowalkAvailable;
         internal static ConfigEntry<float> AutoAnnounceInterval;
         internal static ConfigEntry<float> ScanRadius;
         internal static ConfigEntry<bool> SuppressSkeletonLodSpam;
@@ -182,6 +199,39 @@ namespace CultAccess
                 "Read the body text of the panel currently open: tutorial explanations, " +
                 "popup text, anything not attached to a button.");
 
+            // F3 and F4 rather than more of the where-am-I sentence. The survival readout is
+            // already five clauses long and is pressed constantly; four cult bars and a full
+            // follower reading do not belong inside something asked that often. Both keep
+            // their physical position on every keyboard layout, and both sit with the other
+            // reading keys.
+            KeyCultStatus = Config.Bind("Hotkeys", "CultStatus", KeyCode.F3,
+                "Speak the cult's faith, food, cleanliness and warmth, and how many followers " +
+                "you have. The game draws these as coloured bars with no text at all, and all " +
+                "four read the same way round: full is good. Bars you have not unlocked yet " +
+                "are left out.");
+            KeyFollowerStatus = Config.Bind("Hotkeys", "FollowerStatus", KeyCode.F4,
+                "Speak everything about one follower: their loyalty, food and health, what is " +
+                "wrong with them, and what they are doing. Describes the follower selected in " +
+                "the target list, or the nearest one if the selection is something else.");
+            AnnounceCultStatus = Config.Bind("Speech", "AnnounceCultStatus", true,
+                "Say when a cult bar drops below a quarter full, or climbs back. This is not " +
+                "cosmetic: below that line the game starts turning a random follower into a " +
+                "dissenter, a starving one, or a sick one, and it warns sighted players by " +
+                "making the bar pulse. Also reports when a ritual locks a bar so it cannot " +
+                "change.");
+            AnnounceCultInWhereAmI = Config.Bind("Speech", "AnnounceCultInWhereAmI", true,
+                "Add a short 'faith low' style clause to the where-am-I key while a cult bar " +
+                "is below a quarter. Adds nothing at all when every bar is healthy. Turn it " +
+                "off to keep that key to your own health and fervour.");
+            AnnounceFollowerRequests = Config.Bind("Speech", "AnnounceFollowerRequests", true,
+                "Say what a follower is asking for when they put a speech bubble over their " +
+                "head. The bubble is an icon and a sound with no text at all, so the sound " +
+                "already reaches you and its meaning does not. A follower who has walked over " +
+                "to find you is named along with the reason the game recorded — hungry, " +
+                "homeless, ill, ready to level up, holding a finished quest. Only followers " +
+                "within the scan radius are reported, and each one repeats at most once every " +
+                "45 seconds however long they keep asking.");
+
             // Punctuation and bracket keys, deliberately: this game binds gameplay to
             // letters and the mod must never steal one. These are provisional until the
             // Rewired binding dump (Diagnostics/LogGameBindings) confirms a safe set.
@@ -225,6 +275,20 @@ namespace CultAccess
                 "Start walking guidance to the selected target, or stop it if already guiding.");
             KeyWhereIsIt = Config.Bind("Navigation", "AnnounceGuidance", KeyCode.Quote,
                 "Speak the current walking direction immediately.");
+            // Delete rather than a ninth punctuation key: the cluster the other walking
+            // commands use is full, and Delete keeps its physical position on every keyboard
+            // layout, sits with the Home and End bindings this pairs with, and is not the
+            // NVDA modifier the way Insert is.
+            KeyAutowalk = Config.Bind("Navigation", "Autowalk", KeyCode.Delete,
+                "Walk automatically along the route guidance is announcing, and stop again " +
+                "if pressed a second time. Starts guidance to the selected target first if " +
+                "it is not already running. Your own movement keys always take priority " +
+                "while held; autowalk resumes when you let go.");
+            AutowalkAvailable = Config.Bind("Navigation", "AutowalkAvailable", true,
+                "Whether the autowalk key does anything. Autowalk never engages on its own " +
+                "and always needs the key pressed for that journey, so this is here for " +
+                "players who would rather the key could not be hit by accident, or who do " +
+                "not want the mod able to move their character at all.");
             AutoAnnounceInterval = Config.Bind("Navigation", "AutoAnnounceInterval", 3f,
                 "Seconds between automatic guidance updates while guiding. Raise it if the " +
                 "repetition gets tiring; guidance is always available on demand.");
@@ -257,6 +321,12 @@ namespace CultAccess
                 "patch handlers, which run inside the game's own call stack; if these numbers " +
                 "stay small while the game still stutters, that points away from the mod's " +
                 "update loop. Log only, never spoken.");
+            LogFollowerWheel = Config.Bind("Diagnostics", "LogFollowerWheel", true,
+                "Record what state a follower was in when their command wheel opened, which " +
+                "commands it offered, and which doctrines are unlocked. The game builds a " +
+                "different wheel for a sleeping, drunk, dissenting or zombie follower, so a " +
+                "command you cannot find may be locked or may simply be on another wheel, and " +
+                "the two look identical from the outside. Log only, never spoken.");
 
             LogScanCandidates = Config.Bind("Diagnostics", "LogScanCandidates", true,
                 "When scanning, log characters that had to be named from their object name because " +
@@ -279,6 +349,51 @@ namespace CultAccess
                 "actually hear?' — announcers log from their own side in their own wording, " +
                 "and most do not log at all, so a report about what was spoken could not be " +
                 "checked against anything. Log only, never spoken.");
+
+            LogCueAudio = Config.Bind("Diagnostics", "LogCueAudio", true,
+                "Log a once-a-second census of which sound cues actually played, with a " +
+                "count and the loudest volume for each. The companion to LogSpeech for the " +
+                "non-speech half: without it a cue logged once when it first ever sounded " +
+                "and never again, so 'was the enemy cue audible in that room?' had no answer " +
+                "in the log. Log only, never spoken.");
+
+            WarnOnNonStereoOutput = Config.Bind("Speech", "WarnOnNonStereoOutput", true,
+                "Say so at startup when Windows is giving the game a surround output rather " +
+                "than stereo. Every direction cue this mod makes is stereo pan, so a surround " +
+                "mix blurs them, and the game's own positional sounds can be routed to " +
+                "speakers you do not have while music keeps playing. Windows can report this " +
+                "after spatial sound has been switched back off, so it happens without you " +
+                "changing anything. Turn off if you are deliberately running surround.");
+
+            LogCurseAim = Config.Bind("Diagnostics", "LogCurseAim", true,
+                "Log one line per curse cast: which input device the game thought was last " +
+                "used, whether it acquired an auto-aim target, where the shot went, and how " +
+                "far that was from the nearest enemy. The game only acquires an auto-aim " +
+                "target when it believes the last active controller was the keyboard, which " +
+                "would mean a controller player never gets it — and that cannot be tested by " +
+                "hand, because firing with the pad changes the very flag being tested. " +
+                "Log only, never spoken.");
+
+            AnnounceMapReveals = Config.Bind("Speech", "AnnounceMapReveals", true,
+                "Say which place has been revealed when the world map opens itself to show " +
+                "you somewhere new. That reveal is a cutscene rather than a menu — nothing " +
+                "is focused and the only text rides an animation — so without this the whole " +
+                "event passes with just the window's title and then silence.");
+
+            LogSilentSequences = Config.Bind("Diagnostics", "LogSilentSequences", true,
+                "Log scripted moments that hold the camera on something and then say nothing. " +
+                "The game marks progress that way — a chain breaking on the dungeon door, a " +
+                "location revealed on the map — and those carry no text for a screen reader " +
+                "to find, so they reach the player as silence. There are around a hundred " +
+                "places that could do it; this reports the ones you actually meet. " +
+                "Log only, never spoken.");
+
+            AnnounceChainBreaks = Config.Bind("Speech", "AnnounceChainBreaks", true,
+                "Say when a chain breaks on the dungeon door, and how many of the five are " +
+                "left. The game marks it with a twelve-second camera hold, a sound and an " +
+                "animation, and no text at all, so without this one of the few events that " +
+                "opens up the rest of the game passes in silence. It fires when you walk near " +
+                "the door after beating a bishop, which can be long after the fight.");
 
             LogFocus = Config.Bind("Diagnostics", "LogFocus", true,
                 "Log every menu focus change: which adapter described the control, what was " +
@@ -318,6 +433,102 @@ namespace CultAccess
 
             Navigation.WorldScanner.ScanRadius = ScanRadius.Value;
             ScanRadius.SettingChanged += (_, __) => Navigation.WorldScanner.ScanRadius = ScanRadius.Value;
+
+            ApplyAutowalkAvailability();
+            AutowalkAvailable.SettingChanged += (_, __) => ApplyAutowalkAvailability();
+
+
+            // Controller hotkeys. The 2026-08-23 binding probe found exactly one free element
+            // on an XInput pad — the left trigger, unbound in both gameplay and menus — so the
+            // layer is a hold on that and everything else is a chord with it. Each command is
+            // a separate entry rather than one packed string so a bad value names itself, and
+            // BepInEx lists the valid elements next to it in the file.
+            ControllerLayerEnabled = Config.Bind("ControllerLayer", "Enabled", true,
+                "Hold the left trigger to turn the controller into the mod's hotkeys. While " +
+                "it is held the game does not see the other buttons, so nothing fires twice; " +
+                "the left stick still walks you. Set to false to leave the pad entirely alone.");
+
+            FocusEnemiesInCombat = Config.Bind("ControllerLayer", "FocusEnemiesInCombat", true,
+                "When a fight starts, point the target list at the enemies filter, and put it " +
+                "back when the room is clear. This is what lets the d-pad mean the same thing " +
+                "all the time: left and right step the current filter, and during combat that " +
+                "filter is already the enemies. Stepping onto an enemy also points the beacon " +
+                "at it. You can still change filter mid-fight; nothing is locked.");
+
+            // Up and down step the list, left and right change which list. That matches how
+            // a screen-reader user already moves through documents, where up and down are the
+            // items; it is also the way round the player asked for after using the first one.
+            BindCommand(ModCommand.PreviousTarget, PadElement.DPadUp,
+                "Previous target in the current filter. During combat that is the enemies, " +
+                "and landing on one points the beacon at it.");
+            BindCommand(ModCommand.NextTarget, PadElement.DPadDown,
+                "Next target in the current filter.");
+            BindCommand(ModCommand.PreviousCategory, PadElement.DPadLeft,
+                "Step the target filter backward. Filters with nothing in them are skipped.");
+            BindCommand(ModCommand.NextCategory, PadElement.DPadRight,
+                "Step the target filter forward. Filters with nothing in them are skipped.");
+            BindCommand(ModCommand.ToggleGuidance, PadElement.A,
+                "Start or stop walking guidance to the selected target.");
+            BindCommand(ModCommand.EnemyRoster, PadElement.B,
+                "Speak the nearby enemies, nearest first.");
+            BindCommand(ModCommand.CycleBeacon, PadElement.X,
+                "Point the audio beacon at the next enemy; past the last one turns it off.");
+            BindCommand(ModCommand.WhereAmI, PadElement.Y,
+                "Where am I: time of day and character status, or re-read the current menu row.");
+            BindCommand(ModCommand.Rescan, PadElement.LeftShoulder,
+                "Re-scan the surroundings for interactables.");
+            BindCommand(ModCommand.AnnounceGuidance, PadElement.RightShoulder,
+                "Repeat the current walking direction immediately.");
+            BindCommand(ModCommand.Help, PadElement.Back,
+                "Speak the next section of help.");
+            BindCommand(ModCommand.SettingsMenu, PadElement.Start,
+                "Open or close the mod's settings menu.");
+            BindCommand(ModCommand.Autowalk, PadElement.LeftStickButton,
+                "Walk the route automatically, or stop if already walking.");
+            BindCommand(ModCommand.Silence, PadElement.RightStickButton,
+                "Stop the current announcement.");
+            BindCommand(ModCommand.RepeatLast, PadElement.RightTrigger,
+                "Repeat the last thing said.");
+            BindCommand(ModCommand.CycleBeaconBack, PadElement.None,
+                "Point the beacon at the previous enemy. Unbound by default: the d-pad already " +
+                "steps enemies in both directions during combat.");
+            BindCommand(ModCommand.ReadPanel, PadElement.None,
+                "Read the body text of the panel currently open.");
+            BindCommand(ModCommand.NearestValidCell, PadElement.None,
+                "Say which way the nearest valid building cell is.");
+            BindCommand(ModCommand.MarkLog, PadElement.None,
+                "Stamp a marker in the log, for reporting a moment.");
+
+            Input.ControllerLayer.Enabled = ControllerLayerEnabled.Value;
+            ControllerLayerEnabled.SettingChanged +=
+                (_, __) => Input.ControllerLayer.Enabled = ControllerLayerEnabled.Value;
+
+            Combat.CombatLifecycle.FocusEnemiesInCombat = FocusEnemiesInCombat.Value;
+            FocusEnemiesInCombat.SettingChanged +=
+                (_, __) => Combat.CombatLifecycle.FocusEnemiesInCombat = FocusEnemiesInCombat.Value;
+
+            Diagnostics.AudioOutputInfo.WarnOnNonStereo = WarnOnNonStereoOutput.Value;
+            WarnOnNonStereoOutput.SettingChanged +=
+                (_, __) => Diagnostics.AudioOutputInfo.WarnOnNonStereo = WarnOnNonStereoOutput.Value;
+
+            UI.ChainBreakAnnouncer.Enabled = AnnounceChainBreaks.Value;
+            AnnounceChainBreaks.SettingChanged +=
+                (_, __) => UI.ChainBreakAnnouncer.Enabled = AnnounceChainBreaks.Value;
+
+            UI.MapRevealAnnouncer.Enabled = AnnounceMapReveals.Value;
+            AnnounceMapReveals.SettingChanged +=
+                (_, __) => UI.MapRevealAnnouncer.Enabled = AnnounceMapReveals.Value;
+
+            Diagnostics.SilentSequenceProbe.Enabled = LogSilentSequences.Value;
+            LogSilentSequences.SettingChanged +=
+                (_, __) => Diagnostics.SilentSequenceProbe.Enabled = LogSilentSequences.Value;
+
+            Diagnostics.CurseAimDiagnostics.Enabled = LogCurseAim.Value;
+            LogCurseAim.SettingChanged +=
+                (_, __) => Diagnostics.CurseAimDiagnostics.Enabled = LogCurseAim.Value;
+
+            Audio.CuePlayer.LogCensus = LogCueAudio.Value;
+            LogCueAudio.SettingChanged += (_, __) => Audio.CuePlayer.LogCensus = LogCueAudio.Value;
 
             Navigation.WorldScanner.LogUnnamedCharacters = LogScanCandidates.Value;
             LogScanCandidates.SettingChanged +=
@@ -399,6 +610,32 @@ namespace CultAccess
         /// still far earlier than any gameplay. It also makes the mod independent of however
         /// a given tester's BepInEx happens to be configured.
         /// </summary>
+        /// <summary>
+        /// Turning autowalk off has to stop a walk already in progress as well as refuse the
+        /// next one. Announced, because a character that stops moving for a reason the player
+        /// did not connect to the switch they just flipped is a bug report.
+        /// </summary>
+        /// <summary>
+        /// One config entry per command, so an unrecognised value names the command it broke
+        /// and BepInEx writes the list of valid elements beside it in the file.
+        /// </summary>
+        private void BindCommand(ModCommand command, PadElement element, string description)
+        {
+            var entry = Config.Bind(
+                "ControllerLayer", command.ToString(), element,
+                description + " Held with the left trigger.");
+
+            Input.ControllerLayer.Bind(command, entry.Value);
+            entry.SettingChanged += (_, __) => Input.ControllerLayer.Bind(command, entry.Value);
+        }
+
+        private static void ApplyAutowalkAvailability()
+        {
+            Navigation.Autowalk.Available = AutowalkAvailable.Value;
+            if (!AutowalkAvailable.Value)
+                Navigation.Autowalk.Disengage("turned off in settings", "Autowalk off.");
+        }
+
         private void ApplyPatchesOnce()
         {
             if (_patchesApplied) return;
@@ -441,6 +678,7 @@ namespace CultAccess
             {
                 _bindingsDumped = true;
                 Diagnostics.BindingDump.LogKeyboardBindings();
+                Diagnostics.BindingDump.LogControllerBindings();
             }
 
             // Shares the binding dump's delay for the same reason: the game's own subsystems
@@ -450,6 +688,18 @@ namespace CultAccess
 
             Diagnostics.FrameBudget.Tick();
             var frameStarted = Diagnostics.FrameBudget.Begin();
+
+            // Unconditional and above every early return: the census has to be able to
+            // report a second in which nothing played, which is itself the answer to
+            // "was anything audible?".
+            Audio.CuePlayer.TickCensus();
+            Diagnostics.SilentSequenceProbe.Tick();
+            UI.ChainBreakAnnouncer.Tick();
+
+            // Above the speech gate and every world-hotkey gate: the layer owns the pad while
+            // its trigger is held, and the suppression patches read its state, so a frame in
+            // which this did not run would hand the game input the layer had just consumed.
+            Input.ControllerLayer.Tick();
 
             // Split one subsystem per scope. The grouped "status" scope showed a sustained
             // average of several milliseconds a frame, which is a continuous cost rather than
@@ -492,6 +742,10 @@ namespace CultAccess
             scope = Diagnostics.FrameBudget.Begin();
             Status.ChoreProgressTracker.Tick();
             Diagnostics.FrameBudget.End("status.chores", scope);
+
+            scope = Diagnostics.FrameBudget.Begin();
+            Status.CultStatusAnnouncer.Tick();
+            Diagnostics.FrameBudget.End("status.cult", scope);
 
             Diagnostics.FrameBudget.End("status", statusStarted);
 
@@ -580,6 +834,15 @@ namespace CultAccess
             if (Input.Keys.Down(KeyNearestValidCell.Value))
                 Building.NearestValidCell.Announce();
 
+            // Outside the world-hotkey gate on purpose. Both readouts are about state rather
+            // than about the world in front of you, and the cult bars are exactly what a
+            // player wants while a menu or a card is up.
+            if (Input.Keys.Down(KeyCultStatus.Value))
+                Status.CultStatusAnnouncer.AnnounceCurrent();
+
+            if (Input.Keys.Down(KeyFollowerStatus.Value))
+                Status.FollowerAnnouncer.AnnounceSelected();
+
             var worldHotkeysAllowed = !UI.ConfigMenu.IsOpen &&
                                       !UI.FollowerWheelAnnouncer.BlocksWorldHotkeys &&
                                       !UI.RadialMenuAnnouncer.BlocksWorldHotkeys;
@@ -620,6 +883,9 @@ namespace CultAccess
                 if (Input.Keys.Down(KeyWhereIsIt.Value) || Input.Keys.Down(AltWhereIsIt.Value))
                     Navigation.Navigator.AnnounceGuidance();
 
+                if (Input.Keys.Down(KeyAutowalk.Value))
+                    Navigation.Autowalk.Toggle();
+
                 if (Input.Keys.Down(KeyEnemies.Value))
                     Combat.EnemyRadar.AnnounceHostiles();
 
@@ -640,6 +906,11 @@ namespace CultAccess
             {
                 var navigationStarted = Diagnostics.FrameBudget.Begin();
                 Navigation.Navigator.Tick();
+                // After the navigator, so the heading is the one this frame's route produced.
+                // Inside the same gate on purpose: a settings menu or a follower wheel stops
+                // this being called, the frame stamp goes stale, and the Lamb stops walking
+                // without either subsystem having to know about the other.
+                Navigation.Autowalk.Tick();
                 Diagnostics.FrameBudget.End("navigation", navigationStarted);
 
                 var radarStarted = Diagnostics.FrameBudget.Begin();
@@ -692,6 +963,8 @@ namespace CultAccess
             Status.OnboardingTracker.Shutdown();
             Status.DayCycleAnnouncer.Shutdown();
             Status.ChoreProgressTracker.Shutdown();
+            Status.CultStatusAnnouncer.Shutdown();
+            Status.FollowerAttentionAnnouncer.Shutdown();
             UI.ObjectiveAnnouncer.Shutdown();
             Building.PlacementAnnouncer.Shutdown();
             Building.BuildingTargetRefresh.Shutdown();

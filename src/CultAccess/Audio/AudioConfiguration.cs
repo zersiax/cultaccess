@@ -161,7 +161,9 @@ namespace CultAccess.Audio
                     "this is the distance at which they go completely silent.");
                 Interval[cue] = config.Bind(AmbientSection, key + "Repeat", defaults.Interval,
                     "Seconds between repeats for one source in this category. Shorter is more " +
-                    "present and more tiring.");
+                    "present and more tiring. Enemies are the exception: for them this is the " +
+                    "rate at the very edge of the range, and each hostile speeds up as it " +
+                    "closes, so how fast one is ticking tells you how near it is.");
                 MaxSources[cue] = config.Bind(AmbientSection, key + "MaxAtOnce", defaults.MaxSources,
                     "How many of this category may sound at once, nearest first. This is what " +
                     "stops a busy room becoming a wash.");

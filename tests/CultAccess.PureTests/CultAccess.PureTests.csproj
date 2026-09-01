@@ -14,10 +14,13 @@
     <Compile Include="..\..\src\CultAccess\Navigation\DungeonDoorText.cs" Link="DungeonDoorText.cs" />
     <Compile Include="..\..\src\CultAccess\Navigation\BuildingEntranceText.cs" Link="BuildingEntranceText.cs" />
     <Compile Include="..\..\src\CultAccess\Navigation\RoutePlanarMath.cs" Link="RoutePlanarMath.cs" />
+    <Compile Include="..\..\src\CultAccess\Navigation\AutowalkPolicy.cs" Link="AutowalkPolicy.cs" />
     <Compile Include="..\..\src\CultAccess\Navigation\RouteGuidanceText.cs" Link="RouteGuidanceText.cs" />
     <Compile Include="..\..\src\CultAccess\Status\PlayerStatusText.cs" Link="PlayerStatusText.cs" />
     <Compile Include="..\..\src\CultAccess\Status\OnboardingText.cs" Link="OnboardingText.cs" />
     <Compile Include="..\..\src\CultAccess\Status\DayCycleText.cs" Link="DayCycleText.cs" />
+    <Compile Include="..\..\src\CultAccess\Status\CultStatusText.cs" Link="CultStatusText.cs" />
+    <Compile Include="..\..\src\CultAccess\Status\FollowerStatusText.cs" Link="FollowerStatusText.cs" />
     <Compile Include="..\..\src\CultAccess\Combat\ThreatPrediction.cs" Link="ThreatPrediction.cs" />
     <Compile Include="..\..\src\CultAccess\UI\ProgressionText.cs" Link="ProgressionText.cs" />
     <Compile Include="..\..\src\CultAccess\UI\SpeakerNameText.cs" Link="SpeakerNameText.cs" />

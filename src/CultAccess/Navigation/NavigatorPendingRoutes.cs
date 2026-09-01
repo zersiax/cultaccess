@@ -48,7 +48,8 @@ namespace CultAccess.Navigation
             EnsureGraphHook();
             Diagnostics.NavigationDiagnostics.LogReachability(
                 trigger, target, snapshot, snapshot, blockers, locked, _graphRevision);
-            Speaker.Say(PendingRouteAnnouncement(target, player.position, blockers, locked));
+            Speaker.Say(
+                PendingRouteAnnouncement(target, player.position, blockers, locked, snapshot));
         }
 
         private static bool TryResumePendingRoute(Transform player, string trigger)
@@ -95,12 +96,25 @@ namespace CultAccess.Navigation
             PointOfInterest target,
             Vector3 playerPosition,
             RouteBlockerInspection blockers,
-            bool locked)
+            bool locked,
+            ReachabilitySnapshot snapshot)
         {
             var best = blockers?.Best;
             if (locked && best != null && best.IsTargetDoorBarrier)
                 return $"{target.Name} is locked; its active room barrier is closed. " +
                        "Guidance will start when it opens.";
+
+            // Measured 2026-08-26 in Pilgrim's Passage: the Fisherman and the fishing spot sat
+            // on A* area 54 while the player stood on area 52, both walkable, no blockers. Two
+            // connected components means no amount of waiting joins them — you reach that
+            // shore another way. Promising to keep checking sent the player standing there
+            // waiting for something that could not arrive, which is why they fell back to
+            // manual navigation without knowing why.
+            if (!locked && snapshot != null &&
+                snapshot.State == RouteReachabilityState.Disconnected)
+                return $"No walkable route to {target.Name} from here. " +
+                       "It is not connected to where you are standing, so guidance cannot " +
+                       "lead you; try another way in.";
 
             var start = locked
                 ? $"{target.Name} is currently locked."
@@ -135,6 +149,11 @@ namespace CultAccess.Navigation
             Diagnostics.NavigationGraphDiagnostics.LogGraphLifecycle(
                 "graph-replaced", _graphRevision, active);
             RequestPendingRetry("graph-replaced");
+
+            // A replaced graph is the game changing rooms, which is the one moment the whole
+            // scanned catalogue is guaranteed to be about somewhere the player no longer is.
+            MarkCatalogueStale("graph-replaced");
+            EndOfRunDoor.Forget();
         }
 
         private static void OnGraphsUpdated(AstarPath graph)

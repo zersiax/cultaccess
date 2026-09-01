@@ -85,6 +85,7 @@ namespace CultAccess.Navigation
                     ? null
                     : DungeonDoorPassage.Inspect(dungeonDoor, state);
                 var weaponPodium = interaction as Interaction_WeaponSelectionPodium;
+                var templeBossDoor = interaction as Interaction_TempleBossDoor;
                 var followerInteraction = interaction as interaction_FollowerInteraction;
                 if (basePassage != null && !BasePassage.ShouldInclude(basePassage))
                 {
@@ -142,6 +143,7 @@ namespace CultAccess.Navigation
                     BasePassageGate = basePassage,
                     DungeonDoor = dungeonDoor,
                     WeaponPodium = weaponPodium,
+                    TempleBossDoor = templeBossDoor,
                     AimPositionOverride = basePassage == null ? (Vector3?)null : aimPosition,
                     IsReturnPassage = basePassage != null && returningToBase,
                 };
@@ -207,6 +209,13 @@ namespace CultAccess.Navigation
             if (interaction is Interaction_WeaponSelectionPodium weaponPodium)
                 return WeaponPodiumTarget.Name(weaponPodium, state);
 
+            // Named before the generic label path, because it has no live label at all: its
+            // Interactable is false for almost its whole life and every label slot is empty,
+            // so the generic path produced "Temple Boss Door, currently unavailable" for a
+            // door the player simply walks through.
+            if (interaction is Interaction_TempleBossDoor templeBossDoor)
+                return TempleBossDoorName(templeBossDoor);
+
             if (interaction is Interaction_HeartPickupBase heartPickup)
                 return HeartPickupTarget.Name(heartPickup);
 
@@ -238,6 +247,12 @@ namespace CultAccess.Navigation
                 actionName = FallbackInteractionName(interaction);
             }
 
+            // Some interactions carry a description rather than a verb — the resources chest
+            // is labelled "Followers deposit resources here while you are away." — and the
+            // sentences this gets composed into add their own full stop. One game label ends
+            // in a bare pipe. Neither belongs in a name.
+            actionName = RichText.TrimTrailingPunctuation(actionName);
+
             // Interactions are action-first in the game's UI ("Cook", "Build", ...),
             // but that is ambiguous in a target list containing several structures. Keep
             // the live action label while adding the owning building's localized name.
@@ -252,9 +267,12 @@ namespace CultAccess.Navigation
                     var structureName = Building.PlacementDescriber.Name(type);
 
                     if (string.IsNullOrEmpty(actionName)) return structureName;
-                    if (actionName.IndexOf(
-                            structureName, System.StringComparison.OrdinalIgnoreCase) >= 0)
-                        return actionName;
+
+                    // Repetition happens in both directions, and only whole words settle it.
+                    // "Cooking Fire, Cook" is worth keeping even though "Cook" is a substring
+                    // of "Cooking"; "Meal Bad Meat, Meal" is not, because there it is a word.
+                    if (RichText.ContainsWord(actionName, structureName)) return actionName;
+                    if (RichText.ContainsWord(structureName, actionName)) return structureName;
 
                     return isBuildAction
                         ? $"{actionName} {structureName}"
@@ -327,18 +345,40 @@ namespace CultAccess.Navigation
             {
                 Plugin.Log.LogWarning($"Conversation speaker localisation failed: {e.Message}");
             }
+            // HumaniseKey rather than Humanise: reaching here means no translation was found,
+            // so what is left is the key itself and its casing is the data's, not a choice
+            // anybody made. Names go through Humanise and keep whatever case they were given.
             var separator = raw.LastIndexOf('/');
             return separator >= 0
-                ? RichText.Humanise(raw.Substring(separator + 1))
-                : raw;
+                ? RichText.HumaniseKey(raw.Substring(separator + 1))
+                : RichText.HumaniseKey(raw);
+        }
+
+        /// <summary>
+        /// The boss door is a trigger, not a button. `OnTriggerEnter2D` changes room on the
+        /// Player tag, so once its own `Unlocked` field is set there is nothing to press —
+        /// the same wording the base passages and open dungeon doors already use.
+        /// </summary>
+        private static string TempleBossDoorName(Interaction_TempleBossDoor door)
+        {
+            var unlocked = new PointOfInterest { TempleBossDoor = door }.TempleBossDoorUnlocked;
+            return unlocked
+                ? "Temple Boss Door, walk through without pressing Interact"
+                : "Temple Boss Door, sealed";
         }
 
         private static string DoorName(Door door)
         {
             var direction = door.direction.ToString().ToLowerInvariant();
-            return door.ConnectionType == GenerateRoom.ConnectionTypes.Entrance
+            var name = door.ConnectionType == GenerateRoom.ConnectionTypes.Entrance
                 ? $"{direction} entrance"
                 : $"{direction} exit";
+
+            // A miniboss room's forward door is either sealed or a fresh map, and neither is
+            // what "exit" leads a player to expect. Say which in the name, because this is a
+            // door somebody will otherwise walk to twice before concluding it is broken.
+            var state = EndOfRunDoor.Describe(door);
+            return state == null ? name : $"{name}, {state}";
         }
     }
 }

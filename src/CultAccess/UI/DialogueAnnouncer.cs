@@ -97,6 +97,10 @@ namespace CultAccess.UI
 
             if (Plugin.LogDialogue.Value)
             {
+                // Any dialogue clears the silent-sequence probe's pending camera holds: a hold
+                // that was framing something spoken is not one of the ones it is hunting.
+                Diagnostics.SilentSequenceProbe.NoteSpokenText();
+
                 Plugin.Log.LogInfo(
                     $"[dialogue via {source}] position={MMConversation.Position} bark={isBark} " +
                     $"speaker={Quote(speaker)} body={Quote(body)}");

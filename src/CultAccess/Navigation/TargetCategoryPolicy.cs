@@ -47,6 +47,15 @@ namespace CultAccess.Navigation
 
         public static TargetCategory At(int index) => Categories[index];
 
+        /// <summary>Position of a category in the cycle, or -1. Used to jump straight to one.</summary>
+        public static int IndexOf(TargetCategory category)
+        {
+            for (var i = 0; i < Categories.Length; i++)
+                if (Categories[i] == category) return i;
+
+            return -1;
+        }
+
         public static bool Matches(TargetCategory category, PointOfInterest poi)
         {
             switch (category)

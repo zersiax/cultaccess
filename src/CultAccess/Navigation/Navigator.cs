@@ -29,6 +29,17 @@ namespace CultAccess.Navigation
         private static bool _suppressRecoveredRouteDirection;
         private static string _lastRouteBearing;
         private static bool _postPathInstructionAnnounced;
+        private static float _catalogueStaleAt;
+        private static object _lastRoom;
+
+        /// <summary>
+        /// How long to let a new room settle before re-scanning it.
+        ///
+        /// The graph is replaced the instant a room loads, which is earlier than its contents
+        /// finish spawning. Scanning on that signal alone would produce a confidently empty
+        /// room, which is the failure this exists to prevent rather than a new form of it.
+        /// </summary>
+        private const float RoomSettleSeconds = 0.75f;
 
         /// <summary>Seconds between automatic guidance updates while tracking.</summary>
         public static float AutoAnnounceInterval = 3f;
@@ -48,6 +59,85 @@ namespace CultAccess.Navigation
         internal static int GraphRevision => _graphRevision;
 
         public static void Refresh(bool announce = true) => TargetCatalog.Refresh(announce);
+
+        /// <summary>
+        /// Note that the scanned world is out of date, to be re-scanned once it settles.
+        ///
+        /// A scan costs about 57 ms on this machine, so it cannot be done per keypress and the
+        /// catalogue is deliberately built once and reused. The cost of that is staleness, and
+        /// a session log showed exactly what staleness looks like: after a room cleared, every
+        /// target in the list was a corpse, so the Everything filter reported four scanned and
+        /// none shown, and the player had no targets at all until they pressed rescan by hand.
+        ///
+        /// Marked rather than done immediately, both to settle the room and so that several
+        /// causes arriving together — barriers opening, destructibles breaking, the graph being
+        /// replaced — cost one scan between them instead of one each.
+        /// </summary>
+        /// <param name="settle">
+        /// How long to wait first. The room-change default lets contents finish spawning;
+        /// a caller that already knows the thing it wants exists — combat has counted live
+        /// enemies — passes zero, because there is nothing left to wait for and waiting is
+        /// what let the enemies filter be announced empty.
+        /// </param>
+        internal static void MarkCatalogueStale(string reason, float settle = RoomSettleSeconds)
+        {
+            if (_catalogueStaleAt > 0f) return;
+
+            _catalogueStaleAt = Time.unscaledTime + settle;
+
+            // Never zero, or the "is something pending?" test above cannot tell pending from
+            // idle and a burst of causes would each queue their own scan.
+            if (_catalogueStaleAt <= 0f) _catalogueStaleAt = float.Epsilon;
+
+            Plugin.Log.LogInfo($"[scan] catalogue marked stale reason={reason} settle={settle:0.00}s");
+        }
+
+        /// <summary>
+        /// Notice the game changing rooms, which is the moment the whole scanned catalogue
+        /// stops being about anywhere the player is.
+        ///
+        /// **The A* graph is not the room.** This originally hooked graph replacement, which
+        /// looked right and was measured wrong: a 56-room session produced only 5
+        /// `graph-replaced` events across 7 graph instances, because the game reuses one graph
+        /// across a whole floor. Rooms changed underneath it and the catalogue kept describing
+        /// the last one, which is what left the target list holding three dead things and
+        /// every filter reporting nothing.
+        ///
+        /// `BiomeGenerator.Instance.CurrentRoom` is the game's own answer to "which room is
+        /// this", and comparing the reference is a field read per frame.
+        /// </summary>
+        private static void DetectRoomChange()
+        {
+            object room;
+            try
+            {
+                var generator = MMBiomeGeneration.BiomeGenerator.Instance;
+                room = generator == null ? null : generator.CurrentRoom;
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Log.LogWarning($"[scan] could not read the current room: {e.Message}");
+                return;
+            }
+
+            if (ReferenceEquals(room, _lastRoom)) return;
+
+            var first = _lastRoom == null;
+            _lastRoom = room;
+            if (first || room == null) return;
+
+            MarkCatalogueStale("room-changed");
+        }
+
+        private static void RefreshStaleCatalogueWhenDue()
+        {
+            if (_catalogueStaleAt <= 0f || Time.unscaledTime < _catalogueStaleAt) return;
+
+            // Cleared first, so a scan that throws cannot leave this re-entering every frame.
+            _catalogueStaleAt = 0f;
+            Plugin.Log.LogInfo("[scan] re-scanning after a world change");
+            TargetCatalog.Refresh(announce: false, preserveSelection: true);
+        }
 
         /// <summary>
         /// Rebuild a cached catalogue after a world mutation without interrupting speech or
@@ -74,9 +164,21 @@ namespace CultAccess.Navigation
             }
 
             var player = Player;
-            if (player == null || !target.Alive)
+            if (player == null)
             {
                 Speaker.Say("That target is gone.");
+                return;
+            }
+
+            // A dead selection almost always means the catalogue is describing a room that has
+            // moved on, and refusing was a dead end: the player pressed guide, heard "that
+            // target is gone", and was left holding the same stale list to try again from.
+            // Re-scan and hand back a live selection instead, which is what Cycle already does.
+            if (!target.Alive)
+            {
+                Plugin.Log.LogInfo(
+                    $"[scan] guidance target \"{target.Name}\" is gone; re-scanning rather than refusing");
+                Refresh();
                 return;
             }
 
@@ -132,6 +234,11 @@ namespace CultAccess.Navigation
                 if (announce) Speaker.Say("Not guiding.");
                 return;
             }
+
+            // Autowalk rides on guidance and cannot outlive it. Silent, because every route
+            // ending — arrival, a target that is gone, the player's own stop key — already
+            // says what happened in its own words.
+            Autowalk.Disengage("guidance stopped");
 
             _tracked = null;
             _pendingRoute = null;
@@ -207,7 +314,8 @@ namespace CultAccess.Navigation
                     _lastRouteBearing = direct;
                     Speaker.Say(
                         RouteGuidanceText.DirectLine(
-                            direct, _tracked.Name, Compass.DescribeTravelDistance(remaining)),
+                            direct, _tracked.Name, Compass.DescribeTravelDistance(remaining),
+                            BlockedAlong(player.position, _tracked.AimPosition)),
                         SpeechPriority.Superseding);
                 }
                 return;
@@ -255,7 +363,8 @@ namespace CultAccess.Navigation
                 // the transition-trigger centre is a separate final direct approach.
                 finalStep,
                 changedHeading,
-                firstInstruction);
+                firstInstruction,
+                BlockedAlong(player.position, step.Value));
 
             _lastRouteBearing = bearing;
             Speaker.Say(message, SpeechPriority.Superseding);
@@ -264,9 +373,30 @@ namespace CultAccess.Navigation
                 Plugin.Log.LogInfo(
                     $"[nav instruction] kind={(changedHeading ? "turn" : firstInstruction ? "go" : "continue")} " +
                     $"bearing={bearing} stepDistance={stepDistance:0.00} remaining={remaining:0.00} " +
-                    $"finalStep={finalStep} target=\"{_tracked.Name}\"");
+                    $"finalStep={finalStep} blocked={BlockedAlong(player.position, step.Value)} " +
+                    $"target=\"{_tracked.Name}\"");
             }
             return true;
+        }
+
+        /// <summary>
+        /// True when the wall sonar is in contact roughly the way the instruction points.
+        ///
+        /// Sixty degrees either side, because the instruction is quantised to eight compass
+        /// points and the sonar probes the live movement direction: the two are describing the
+        /// same intent through different resolutions, and a tighter cone would miss exactly
+        /// the near-miss cases this exists for.
+        /// </summary>
+        private static bool BlockedAlong(Vector3 from, Vector3 towards)
+        {
+            if (!Combat.ObstacleSonar.Blocked) return false;
+
+            var heading = new Vector2(towards.x - from.x, towards.y - from.y);
+            if (heading.sqrMagnitude <= 0.0001f) return false;
+
+            const float sixtyDegrees = 0.5f;
+            return Vector2.Dot(
+                heading.normalized, Combat.ObstacleSonar.BlockedDirection) >= sixtyDegrees;
         }
 
         /// <summary>
@@ -289,7 +419,8 @@ namespace CultAccess.Navigation
             _lastRouteBearing = bearing;
             Speaker.Say(
                 RouteGuidanceText.DirectLine(
-                    bearing, _tracked.Name, Compass.DescribeTravelDistance(remaining)),
+                    bearing, _tracked.Name, Compass.DescribeTravelDistance(remaining),
+                    BlockedAlong(player.position, _tracked.AimPosition)),
                 SpeechPriority.Superseding);
 
             if (Diagnostics.NavigationDiagnostics.Enabled)
@@ -305,9 +436,14 @@ namespace CultAccess.Navigation
         /// <summary>Driven from the plugin's Update. Cheap when not tracking.</summary>
         public static void Tick()
         {
-            if (_tracked == null) return;
-
+            // Above the guidance check on purpose. Room changes have to be noticed whether or
+            // not something is being tracked; keeping this behind the early return is why a
+            // new room's catalogue stayed empty until the player rescanned by hand.
             EnsureGraphHook();
+            DetectRoomChange();
+            RefreshStaleCatalogueWhenDue();
+
+            if (_tracked == null) return;
 
             var player = Player;
             if (player == null) return;

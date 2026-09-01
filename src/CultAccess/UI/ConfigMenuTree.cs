@@ -76,6 +76,11 @@ namespace CultAccess.UI
             page.Add(ConfigItems.Toggle("config.day_cycle", Plugin.AnnounceDayCycle));
             page.Add(ConfigItems.Toggle("config.chore_progress", Plugin.AnnounceChoreProgress));
             page.Add(ConfigItems.Toggle("config.onboarding", Plugin.AnnounceOnboardingPhase));
+            page.Add(ConfigItems.Toggle("config.cult_status", Plugin.AnnounceCultStatus));
+            page.Add(ConfigItems.Toggle(
+                "config.cult_in_where_am_i", Plugin.AnnounceCultInWhereAmI));
+            page.Add(ConfigItems.Toggle(
+                "config.follower_requests", Plugin.AnnounceFollowerRequests));
             page.Add(ConfigItems.Toggle("config.combat_state",
                 CombatConfiguration.AnnounceCombatState));
 
@@ -93,6 +98,8 @@ namespace CultAccess.UI
                 "config.mode_beacon_and_speech",
                 "config.mode_beacon_only",
                 "config.mode_speech_only"));
+
+            page.Add(ConfigItems.Toggle("config.autowalk", Plugin.AutowalkAvailable));
 
             page.Add(ConfigItems.Submenu("config.beacon_cues",
                 SoundMenuPages.GroupPage(CueGroup.Wayfinding)));
@@ -147,6 +154,7 @@ namespace CultAccess.UI
             page.Add(ConfigItems.Toggle("config.log_scan", Plugin.LogScanCandidates));
             page.Add(ConfigItems.Toggle("config.log_bindings", Plugin.LogGameBindings));
             page.Add(ConfigItems.Toggle("config.log_frame_budget", Plugin.LogFrameBudget));
+            page.Add(ConfigItems.Toggle("config.log_follower_wheel", Plugin.LogFollowerWheel));
 
             return page;
         }

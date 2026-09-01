@@ -86,6 +86,20 @@ namespace CultAccess.UI
             if (PlayerUpgradesDescriber.TryDescribe(selectable, out var playerUpgradeDescription))
                 return playerUpgradeDescription;
 
+            // Follower tiles and the summary screen's thought rows: names and prose are
+            // already text, but the loyalty, food and illness bars beside them are fills with
+            // no text at all, and so is a thought's faith arrow. Ahead of the indoctrination
+            // adapter because the summary screen carries both kinds of tile.
+            // Notification history rows lead with a bare faith number; move it behind the
+            // sentence that gives it meaning.
+            adapter = "cult-history";
+            if (CultPageDescriber.TryDescribeHistoryRow(selectable, out var historyDescription))
+                return historyDescription;
+
+            adapter = "follower-card";
+            if (FollowerCardDescriber.TryDescribe(selectable, out var followerDescription))
+                return followerDescription;
+
             // Form, variant and trait tiles: a rendered character or an icon, and no text at
             // all. Also what Twitch chat votes on, so both sides need the name.
             adapter = "indoctrination";

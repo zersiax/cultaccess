@@ -82,6 +82,34 @@ namespace CultAccess
                 "and says when you arrive. " +
                 "North means screen up, so north east means push up and right.",
 
+                "Controller. Hold the left trigger to turn the pad into the mod's hotkeys. " +
+                "It is the only button this game leaves free, so everything is a chord with " +
+                "it. While it is held the game does not see the other buttons, so nothing " +
+                "fires twice, and the left stick still walks you. " +
+                "D-pad up and down step the target filter; left and right step through the " +
+                "targets in it. A starts and stops guidance, left stick click is autowalk, " +
+                "right shoulder repeats the direction, left shoulder re-scans. " +
+                "B lists the enemies, X points the beacon at the next one, Y is where am I, " +
+                "right trigger repeats the last thing said, right stick click stops it. " +
+                "Back is this help, Start is the settings menu. " +
+                "When a fight starts the target filter moves to the enemies by itself and " +
+                "moves back when the room is clear, so in combat left and right are already " +
+                "stepping enemies and landing on one points the beacon at it. Every one of " +
+                "these can be moved in the ControllerLayer section of the config file.",
+
+                $"Autowalk. {Key(Plugin.KeyAutowalk)} walks you along that route instead of " +
+                "steering yourself, and stops again if pressed a second time. It starts " +
+                "guidance to the selected target first if guidance is not already running, " +
+                "so from a chosen target it is the only key you need. It follows the exact " +
+                "route rather than the eight compass points the instructions are spoken in, " +
+                "so it arrives closer than following the words does. Your own movement keys " +
+                "always win while you hold them and autowalk picks up again when you let go, " +
+                "which is how you step round something in the way. It stops on arrival, when " +
+                "guidance stops, and if it spends three seconds getting nowhere, which it " +
+                "says out loud. It does not fight for you: attacking, dodging and everything " +
+                "else are yours, and it lets go for as long as any of them is happening. " +
+                "Turn the key off entirely under Wayfinding in the settings menu.",
+
                 "Combat. " +
                 $"{Key(Plugin.KeyEnemies)} lists nearby enemies with distance and direction. " +
                 $"{Key(Plugin.KeyBeacon)} points the beacon directly at the next enemy, and turns enemy tracking " +
@@ -93,6 +121,20 @@ namespace CultAccess
                 "you close in, so very fast means you are on top of it. " +
                 "The game's own combat keys are K to attack, left shift for heavy attack, " +
                 "L to shoot, space to dodge, Q for ability, J for relic, and T for fleece ability.",
+
+                "Enemy proximity. The always-on enemy cue now ticks faster the closer that " +
+                "enemy is, the same way the beacon does, and each enemy keeps its own rate. " +
+                "So several around you sound like several rhythms at once, and the fastest " +
+                "one is the nearest — which is the one to deal with. Left and right is still " +
+                "position and pitch is still up or down the screen; only the speed is new. " +
+                "It is the rate rather than the volume that tells you distance, because a " +
+                "changing rhythm carries through a loud fight and a volume difference does not.",
+
+                "Spawners. An enemy announced as a spawner is generating the others. Killing " +
+                "it kills everything it has spawned outright and ends the fight; killing its " +
+                "brood achieves nothing and earns no experience. Spawners are always listed " +
+                "first, in the enemy roster and in the enemies filter, so you never have to " +
+                "step past anything to reach one.",
 
                 "Combat cues. Anything that buzzes harshly means you are about to take " +
                 "damage and should move: a single falling buzz is an enemy winding up a melee " +
@@ -109,11 +151,52 @@ namespace CultAccess
                 "one of these with an explanation, and says what to name a file if you want " +
                 "to replace it with your own.",
 
+                "Your cult. " +
+                $"{Key(Plugin.KeyCultStatus)} reads the four bars the game draws across the top " +
+                "of the screen: faith, food, cleanliness and warmth, plus how many followers " +
+                "you have. All four read the same way round, so a high number is always good, " +
+                "and any bar you have not unlocked is simply left out. Other players call " +
+                "these the faith, hunger and sickness bars. Below a quarter full the mod says " +
+                "so without being asked, because that is the line where the game starts " +
+                "picking a follower at random and making them a dissenter, or starving, or " +
+                "ill. Getting back above it is announced too. A ritual can freeze a bar, " +
+                "which is also said. " +
+                $"{Key(Plugin.KeyWhereAmI)} adds a short reminder while a bar is low and " +
+                "nothing at all when they are all healthy.",
+
+                "Followers around you. Stepping the followers filter now tells you who each " +
+                "one is and what they need: \"Sinterklaas the level 4 Goat, ill, quest to " +
+                "complete\", then the distance and direction. The form and the level are how " +
+                "a sighted player tells two followers apart at a glance, and the last part is " +
+                "the game's own ranking of what is worth walking over for — protect them from " +
+                "lightning, catch them leaving, absolve their sin, complete a quest, collect " +
+                "a reward, or answer one who is asking for you. " +
+                "Followers also put a speech bubble over their head when they want " +
+                "something. That bubble is a picture and a sound with no words in it, so you " +
+                "were hearing the sound and nothing else; you now hear who it was and what " +
+                "they want, with their distance and direction. One who has walked across the " +
+                "base to find you says why — hungry, homeless, ill, ready to level up, " +
+                "holding a finished quest. Each follower repeats at most once every 45 " +
+                "seconds however long they keep asking, and only inside your scan radius.",
+
+                "One follower. " +
+                $"{Key(Plugin.KeyFollowerStatus)} describes a single follower: their loyalty, " +
+                "food and health, what is wrong with them, what they are doing right now, " +
+                "their traits, marriage and age. It describes whichever follower is selected " +
+                "in the target list, so step to one with the followers filter first; if the " +
+                "selection is not a follower it falls back to the nearest one. " +
+                "The same numbers now read off every follower tile in the game — the roster, " +
+                "sacrifices, beds, the daycare, the mating tent — where before they were " +
+                "coloured bars with no text beside them, along with the game's own reason a " +
+                "follower cannot be chosen on that screen.",
+
                 "Reading. " +
                 $"{Key(Plugin.KeyWhereAmI)} re-reads the focused menu item, or current health, " +
                 "fervour, active tarot-card count, and the cult tutorial's next step while no " +
                 "menu is open. " +
-                $"{Key(Plugin.KeyReadPanel)} reads the open panel's body text, such as a tutorial explanation. " +
+                $"{Key(Plugin.KeyReadPanel)} reads the open panel's body text, such as a tutorial " +
+                "explanation, or the statistics on your cult pages, which are numbers with " +
+                "pictures beside them that nothing else can reach. " +
                 $"{Key(Plugin.KeyLogMarker)} stamps a numbered marker in the log; press it when " +
                 "something happens that was not announced, so the moment can be found afterwards. " +
                 $"{Key(Plugin.KeyNearestValidCell)} while placing a building, says which way the " +

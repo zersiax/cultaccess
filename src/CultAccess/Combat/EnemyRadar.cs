@@ -59,7 +59,16 @@ namespace CultAccess.Combat
         /// Point the beacon at the next hostile, cycling nearest-first. Pressing past the
         /// last one turns the beacon off, so there is always a way back to silence.
         /// </summary>
-        public static void CycleBeaconTarget()
+        /// <summary>
+        /// Step the enemy lock. Direction exists because the controller layer puts this on a
+        /// D-pad, where left and right are one gesture apart and a forward-only cycle through
+        /// five enemies to reach the one behind you is the sort of thing that stops a combat
+        /// feature being used at all.
+        ///
+        /// Either direction still passes through "off" once per lap, so the beacon can always
+        /// be dismissed without knowing how many enemies are left.
+        /// </summary>
+        public static void CycleBeaconTarget(int direction = 1)
         {
             var player = NavigatorPlayer.Resolve();
             if (player == null) return;
@@ -74,13 +83,16 @@ namespace CultAccess.Combat
                 return;
             }
 
-            _lockIndex++;
-            if (_lockIndex >= Hostiles.Count)
+            _lockIndex += direction < 0 ? -1 : 1;
+            if (_lockIndex >= Hostiles.Count || _lockIndex < -1)
             {
-                _lockIndex = -1;
-                Beacon.ClearEnemy();
-                Speaker.Say("Enemy beacon off.");
-                return;
+                _lockIndex = _lockIndex < -1 ? Hostiles.Count - 1 : -1;
+                if (_lockIndex < 0)
+                {
+                    Beacon.ClearEnemy();
+                    Speaker.Say("Enemy beacon off.");
+                    return;
+                }
             }
 
             var target = Hostiles[_lockIndex];
@@ -90,6 +102,35 @@ namespace CultAccess.Combat
                 $"id={target.GetInstanceID()} world=({target.transform.position.x:0.00}," +
                 $"{target.transform.position.y:0.00},{target.transform.position.z:0.00})");
             Speaker.Say($"Tracking {Describe(target, player.position)}");
+        }
+
+        /// <summary>
+        /// Point the beacon at one specific enemy, keeping the radar's own index in step so
+        /// its tick still drops the lock when that enemy dies.
+        ///
+        /// Called when the target list lands on an enemy, which is what makes stepping the
+        /// enemies filter and locking the beacon one gesture rather than two. False if the
+        /// enemy is not in range, in which case the caller should leave the beacon alone
+        /// rather than clear it — the player has not asked for anything to change.
+        /// </summary>
+        public static bool LockBeaconOn(UnityEngine.Transform enemy)
+        {
+            if (enemy == null) return false;
+
+            var player = NavigatorPlayer.Resolve();
+            if (player == null) return false;
+
+            Collect(player.position);
+            for (var i = 0; i < Hostiles.Count; i++)
+            {
+                if (Hostiles[i] == null || Hostiles[i].transform != enemy) continue;
+
+                _lockIndex = i;
+                Beacon.SetEnemyTarget(enemy);
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>Drop the beacon if its target died or left, so it never pings at a corpse.</summary>
@@ -117,9 +158,17 @@ namespace CultAccess.Combat
             Gather(Health.team2, origin, rangeSquared);
             Gather(Health.dangerousAnimals, origin, rangeSquared);
 
+            // Spawners first, then by distance. Killing the spawner ends the fight and kills
+            // its brood outright, so it is the one target worth reaching — and burying it
+            // partway down a list you cycle one press at a time is the same as not having it.
             Hostiles.Sort((a, b) =>
-                (a.transform.position - origin).sqrMagnitude
-                .CompareTo((b.transform.position - origin).sqrMagnitude));
+            {
+                var spawnerA = EnemySpawners.IsSpawner(a);
+                if (spawnerA != EnemySpawners.IsSpawner(b)) return spawnerA ? -1 : 1;
+
+                return (a.transform.position - origin).sqrMagnitude
+                    .CompareTo((b.transform.position - origin).sqrMagnitude);
+            });
         }
 
         private static void Gather(List<Health> source, Vector3 origin, float rangeSquared)
@@ -176,7 +225,10 @@ namespace CultAccess.Combat
                 typeName = typeName.Substring(5);
 
             var humanised = RichText.Humanise(typeName.Replace("(Clone)", string.Empty).Trim());
-            return humanised.Length == 0 ? "enemy" : humanised;
+            if (humanised.Length == 0) humanised = "enemy";
+
+            var marker = EnemySpawners.Marker(hostile);
+            return marker == null ? humanised : $"{humanised}, {marker}";
         }
     }
 }

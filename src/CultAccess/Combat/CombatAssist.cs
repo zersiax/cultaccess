@@ -99,33 +99,38 @@ namespace CultAccess.Combat
         /// <see cref="MeleeWarningSchedule"/> for why reacting the instant an attack starts
         /// is guaranteed to dodge too early.
         /// </summary>
-        internal static void WarnMelee(GameObject source, float leadSeconds, string family)
+        internal static void WarnMelee(
+            GameObject source, float leadSeconds, string family,
+            Vector3? impactPosition = null)
         {
             var player = PlayerFarming.Instance;
             if (!Enabled || !MeleeWarnings || source == null || player == null ||
                 Time.timeScale <= 0f || !PlayerCanReceiveRealtimeCues(player))
                 return;
 
-            MeleeWarningSchedule.Schedule(source, leadSeconds, family);
+            MeleeWarningSchedule.Schedule(source, leadSeconds, family, impactPosition);
         }
 
         /// <summary>Play a queued melee warning, once its moment has arrived.</summary>
         internal static void SoundMeleeWarning(
-            GameObject source, float remainingSeconds, string family)
+            GameObject source, float remainingSeconds, string family,
+            Vector3? impactPosition = null)
         {
             var player = PlayerFarming.Instance;
             if (!Enabled || !MeleeWarnings || source == null || player == null ||
                 Time.timeScale <= 0f || !PlayerCanReceiveRealtimeCues(player))
                 return;
 
-            var played = CuePlayer.Play(CueId.MeleeThreat, source.transform.position);
+            // Where the damage will be, not where the attacker is, when the two differ.
+            var at = impactPosition ?? source.transform.position;
+            var played = CuePlayer.Play(CueId.MeleeThreat, at);
             if (played) ProjectileThreatMonitor.RegisterWarning(source, "melee");
 
             CombatDiagnostics.Info(
                 $"[combat melee] family={family} source={DescribeSource(source)} " +
                 $"impactIn={remainingSeconds:0.000} distance=" +
-                $"{Vector3.Distance(player.transform.position, source.transform.position):0.00} " +
-                $"cue={played}");
+                $"{Vector3.Distance(player.transform.position, at):0.00} " +
+                $"aimedAt={(impactPosition.HasValue ? "impact" : "attacker")} cue={played}");
         }
 
         /// <summary>

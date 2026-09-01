@@ -49,13 +49,16 @@ from the game directory.
 
 - **F1** — speak the mod's key assignments, one section per press
 - **F2** — open or close the mod's own settings menu, including Learn sounds
+- **F3** — speak the cult's faith, food, cleanliness and warmth, and the follower count
+- **F4** — describe one follower in full: the selected target, or the nearest one
 - **F7** — stamp a numbered marker into the log at this instant
 - **F8** — read the open panel's body text (tutorial explanations, popup prose)
 - **F9** — speak which speech backend is active (setup diagnostics)
 - **F10** — stop speech
 - **F11** — repeat last announcement
 - **F12** — re-read the current build cell, radial-wheel choice, focused menu item,
-  or live health, fervour, active tarot-card count, and cult tutorial step when no menu is open
+  or live health, fervour, active tarot-card count, and cult tutorial step when no menu is open.
+  Adds a short reminder while a cult bar is low, and nothing while they are all healthy
 
 Walking and navigation. Every command has two bindings, and the first set is the one to
 prefer — it follows the conventions screen-reader users already know from moving through
@@ -67,6 +70,7 @@ documents and lists, and it sits in the same physical place on every keyboard la
   enemies, followers, or characters
 - **Home** — start or stop walking guidance to the selected target
 - **End** — speak the current walking direction now
+- **Delete** — autowalk: walk the route instead of steering yourself; press again to stop
 - **`\`** — re-scan surroundings
 
 The same commands are also on a punctuation cluster, which may suit you better if your hands
@@ -76,6 +80,35 @@ are already there. This is particularly useful in combat:
 - **`/` (slash)** / **Shift+`/` (shift+slash)** — cycle the target filter forward / backward
 - **`; (semicolon)`** — start or stop walking guidance
 - **`' (quote)`** — speak the current walking direction
+
+Controller. Hold the **left trigger** to turn the pad into the mod's hotkeys. A binding probe
+against the game's own Rewired data found that the left trigger is the only genuinely free
+element on an XInput pad — everything else already carries three or four actions — so the layer
+is a hold on it and every command is a chord. While it is held the game does not see the other
+buttons, so nothing fires twice; the left stick still walks you.
+
+- **D-pad up / down** — step the target filter backward / forward
+- **D-pad left / right** — previous / next target in the current filter
+- **A** — start or stop walking guidance
+- **B** — list nearby enemies
+- **X** — point the beacon at the next enemy
+- **Y** — where am I
+- **Left shoulder** — re-scan
+- **Right shoulder** — repeat the walking direction
+- **Left stick click** — autowalk
+- **Right stick click** — stop the current announcement
+- **Right trigger** — repeat the last thing said
+- **Back** — help
+- **Start** — settings menu
+
+When a fight starts the target filter moves to the enemies on its own and moves back when the
+room is clear. That is what lets the D-pad mean the same thing all the time: left and right step
+whatever filter is live, and in combat that is already the enemies. Landing on an enemy points
+the beacon at it, so stepping and locking are one gesture. You can still change filter mid-fight;
+nothing is locked, and the behaviour can be turned off.
+
+Every command is rebindable in the `[ControllerLayer]` section of `dev.cultaccess.cfg`, which
+also lists the valid element names. There is no in-game rebinding page yet.
 
 **A caveat on the punctuation keys.** They are bound by the character they type, not by where
 they sit. On a QWERTZ or AZERTY keyboard the key that produces a semicolon is somewhere else
@@ -184,6 +217,33 @@ Spoken guidance is continuous rather than step-and-wait: the first instruction s
 a heading and segment distance, a changed heading interrupts immediately as `Turn`, and
 straight-through graph points remain silent. The last segment names both its direction and
 destination, while the current instruction still repeats every few seconds if needed.
+
+### Autowalk
+
+**Delete** walks the Lamb along that route for you, and stops again if pressed a second time.
+If guidance is not already running it starts it to the selected target first, so from a chosen
+target autowalk is the only key you need.
+
+It is deliberately narrow. Autowalk decides nothing: it follows the route guidance is already
+announcing, and it stops the moment guidance does. What it does better than following the
+spoken words is precision — it steers at the exact route point rather than at one of the eight
+compass headings the instructions are spoken in, so it arrives closer to the target.
+
+Under the hood it supplies the game's own two movement axes rather than moving the character,
+so speed, collision, facing, the analogue speed curve and the game's own invert-movement
+setting all behave exactly as they do when you hold a direction yourself.
+
+Your own movement keys always take priority while you hold them, and autowalk picks up again
+when you release — that is how you step round something in the way, without having to
+re-engage. It also lets go by itself for anything that is not walking: attacking, dodging,
+aiming, building, the map, fishing and every scripted sequence are yours alone. It stops on
+arrival, when guidance stops, when the settings menu opens, and if it spends three seconds
+without covering ground, which it announces rather than leaving you standing against a wall
+believing you are en route.
+
+Autowalk never engages on its own; the key has to be pressed for that journey. The key can be
+turned off entirely under Wayfinding in the settings menu, for players who would rather the
+mod could not move their character at all.
 
 ## Combat cues
 
@@ -429,6 +489,78 @@ locked collection entries remain hidden. Unlock screens wait until the game's Ac
 actually enabled before telling the player to continue. F8 adds the selected card's lore, and
 run-card additions/removals are announced from the game's own trinket events.
 
+## Your cult, and your followers
+
+The game keeps four cult-wide bars on the HUD — faith, food, cleanliness, and warmth — and
+draws every one of them as a coloured fill with no text anywhere. **F3** reads all four, plus
+the living and dead follower counts. Each is revealed by its own progression flag, so a bar the
+save has not unlocked is left out rather than read as zero, and all four are stated so that a
+high number is good, which is how the game itself orients them: faith over its maximum of 85,
+the mean of satiation minus starvation, cleanliness as the inverse of accumulated waste, and
+warmth as furnace fuel. The game has no written label for any of them; other players call them
+the faith, hunger, and sickness bars.
+
+**A bar below a quarter full is announced without being asked, with the consequence named.**
+That threshold is not cosmetic. The game's own simulation steps pick a random available
+follower below it and make them a dissenter, starving, or ill, at most one per in-game hour
+each — and they tell sighted players by making the bar pulse. Recovery is announced too, with
+hysteresis so a bar resting on the line cannot oscillate. Rituals that freeze a bar are
+reported, and a frozen bar never reads as a warning, because it cannot move. Warmth
+deliberately claims no consequence: its simulation step is empty. Crossings are spoken at the
+base, where the bars are on screen, and logged rather than spoken elsewhere.
+
+Faith notifications now carry their number. The game keeps a card's reason and its amount in
+two separate fields; only the reason was being read, so a follower dying arrived without the
+faith that went with it. Both, and the resulting level, are now one sentence.
+
+Followers in the target list now carry what a sighted player reads off them across the base:
+`Sinterklaas the level 4 Goat, ill, quest to complete`, before the usual distance and bearing.
+The form and level are the game's own authored ones — the overhead name plate is off unless the
+player enables it in Gameplay settings, so form is what identifies a follower at a glance. The
+last clause reproduces the game's own interaction ranking, derived from the fields that label
+branches on rather than from the label, which is blank at any distance. Low verbosity keeps the
+previous bare name.
+
+Followers also put a speech bubble over their head, which is an icon and a positional sound with
+no text in it — so the sound already reached the player and its meaning did not. The mod now
+names the follower and what they want. One who has crossed the base to find you is running a
+task that records *why*, which the bubble itself does not show: hungry, homeless, ill, ready to
+level up, holding a finished quest. Ambient chatter — two followers gossiping, one admiring the
+Crown — stays silent, because it changes no decision. Each follower repeats at most once every
+45 seconds, and only inside the scan radius.
+
+**F4** describes a single follower in full: loyalty, food and health, what is wrong with them,
+what they are doing, traits, marriage, age, and time in the cult. It describes the follower
+selected in the target list — step to one with the Followers filter — and falls back to the
+nearest. The "what is wrong" line is the game's own biggest-need answer rather than an invented
+one. Task names are humanised from the game's task types, which carry no translation of their
+own.
+
+Every follower tile in the game reads the same values. The roster, the sacrifice picker,
+daycare assignment, the mating tent, beds, the healing bay, knucklebones, and the confession
+booth all instantiate one card, whose loyalty, food, illness, and pleasure bars are fills with
+nothing written beside them; the mod reads that card's own fills and its own visibility flags,
+so what is spoken is what is drawn. The tiredness bar is computed by the game and then hidden
+from everyone, so it is not spoken. Loyalty is hidden for a mutated follower and food and
+health for a dead one, and both are honoured. Each tile also names the game's own reason a
+follower cannot be chosen on that screen — dissenting, imprisoned, too many traits, already
+married — of which there are thirty-eight.
+
+The two pages that describe the cult itself read on the panel key. The Cult page behind the
+Temple altar's Doctrine menu holds nine statistics — followers ever, murdered, starved,
+sacrificed, died naturally, crusades, player deaths, kills, winters survived — as bare numbers
+labelled only by the picture beside each, and only its two buttons are focusable, so those
+numbers were unreachable rather than merely unlabelled. The Cult tab of the player menu reads
+its name, all four bars, population and homes; its notification history is left to focus, whose
+rows are individually reachable already.
+
+Reading a follower's mind opens the follower summary screen, so the two are one thing. Its
+thought rows are already text; what was missing is that the follower's own traits and the
+cult's are two grids of identical tiles under headings a screen reader never reaches, and that
+each thought's faith value exists only as one of four arrow sprites. Cult traits now say so,
+and the arrow is named as an arrow rather than as the number behind it, which the card does not
+show to anyone.
+
 ## Inventory, quests, and progression
 
 The Inventory page names each icon-only resource, food, and item with its owned quantity,
@@ -585,7 +717,7 @@ Beacon volume is independent of the game's own sliders, hence its own setting. T
 sounds** section of the settings menu can play it moving left to right and low to high, which
 is the quickest way to internalise that the pitch change is vertical aim rather than distance.
 Under Wayfinding you can also choose whether guidance uses the beacon, spoken instructions, or
-both.
+both, and whether the autowalk key is available at all.
 The comma-key enemy lock temporarily takes priority over a walking-guidance beacon and points
 directly at the enemy transform. Turning enemy tracking off restores any route beacon that is still
 active; the two systems no longer overwrite one another's target.

@@ -33,6 +33,17 @@ namespace CultAccess.Navigation
         internal bool IsBulkResource;
         internal BaseGoopDoor BasePassageGate;
         internal EnterBuilding BuildingEntranceTrigger;
+
+        /// <summary>
+        /// The sealed door to a dungeon's boss. An `Interaction`, but not one you interact
+        /// with: `Interaction_TempleBossDoor.OnTriggerEnter2D` changes room when the player
+        /// walks into it, and `Interactable` is false for almost its whole life.
+        ///
+        /// So it reached the player as "Temple Boss Door, currently unavailable" — the exact
+        /// shape principle 3 warns about, a UI-facing availability read as the truth when the
+        /// real state was "walk through it". Its own `Unlocked` field is the authority.
+        /// </summary>
+        internal Interaction_TempleBossDoor TempleBossDoor;
         internal Interaction_BaseDungeonDoor DungeonDoor;
         internal Interaction_WeaponSelectionPodium WeaponPodium;
         internal Vector3? AimPositionOverride;
@@ -74,7 +85,60 @@ namespace CultAccess.Navigation
         internal bool IsAutomaticPassage =>
             BasePassageGate != null ||
             BuildingEntranceTrigger != null ||
+            (TempleBossDoor != null && TempleBossDoorUnlocked) ||
             (DungeonDoor != null && CurrentDungeonDoorState.Unlocked);
+
+        /// <summary>
+        /// Read through Harmony rather than directly: `Unlocked` is private, and it is the
+        /// only thing that separates a door you walk through from one that is genuinely shut.
+        /// Defaults to shut if it cannot be read, because inviting the player to walk into a
+        /// sealed door is the worse of the two mistakes.
+        /// </summary>
+        internal bool TempleBossDoorUnlocked
+        {
+            get
+            {
+                if (TempleBossDoor == null) return false;
+
+                try
+                {
+                    return TempleBossDoorUnlockedField != null &&
+                           TempleBossDoorUnlockedField(TempleBossDoor);
+                }
+                catch (System.Exception e)
+                {
+                    Plugin.Log.LogWarning(
+                        $"[temple door] could not read its unlocked state: {e.Message}");
+                    return false;
+                }
+            }
+        }
+
+        private static readonly HarmonyLib.AccessTools.FieldRef<Interaction_TempleBossDoor, bool>
+            TempleBossDoorUnlockedField = BuildTempleBossDoorAccessor();
+
+        private static HarmonyLib.AccessTools.FieldRef<Interaction_TempleBossDoor, bool>
+            BuildTempleBossDoorAccessor()
+        {
+            try
+            {
+                var field = HarmonyLib.AccessTools.Field(
+                    typeof(Interaction_TempleBossDoor), "Unlocked");
+                if (field != null)
+                    return HarmonyLib.AccessTools
+                        .FieldRefAccess<Interaction_TempleBossDoor, bool>(field);
+
+                Plugin.Log.LogWarning(
+                    "[temple door] Interaction_TempleBossDoor has no Unlocked field; it will " +
+                    "be described as sealed rather than as a passage.");
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Log.LogWarning($"[temple door] could not bind Unlocked: {e.Message}");
+            }
+
+            return null;
+        }
 
         internal InteractionAvailability CurrentInteractionState
         {
@@ -118,6 +182,14 @@ namespace CultAccess.Navigation
                     return BuildingEntrance.IsOpen(BuildingEntranceTrigger)
                         ? PoiAvailability.Available
                         : PoiAvailability.Unavailable;
+                // Before the generic interaction path, which would read its Interactable and
+                // conclude "unavailable" about a door that is standing open. Unlocked is the
+                // door's own authority; locked rather than unavailable when it is not, because
+                // it opens later in the same run rather than being permanently out of reach.
+                if (TempleBossDoor != null)
+                    return TempleBossDoorUnlocked
+                        ? PoiAvailability.Available
+                        : PoiAvailability.Locked;
                 if (DungeonDoor != null)
                     return CurrentDungeonDoorState.Availability;
                 if (WeaponPodium != null)
@@ -138,6 +210,14 @@ namespace CultAccess.Navigation
         /// <summary>Name plus kind and only the state information that affects use.</summary>
         public string Describe()
         {
+            // Followers are the one kind whose entry is worth more than a name and a noun.
+            // A sighted player reads their form, their level, the warning icons over their
+            // head and whether they are holding a finished quest, all from across the base;
+            // everything here is derived from the same fields those visuals are drawn from.
+            if (Kind == PoiKind.Follower && Interaction is interaction_FollowerInteraction follower)
+                return FollowerTarget.Describe(
+                    follower, Name, Plugin.Verbosity.Value != UI.Verbosity.Low);
+
             var description = Kind == PoiKind.Interactable || Kind == PoiKind.Exit
                 ? Name
                 : $"{Name}, {Kind.ToString().ToLowerInvariant()}";
@@ -301,6 +381,11 @@ namespace CultAccess.Navigation
             if (door.ConnectionType == GenerateRoom.ConnectionTypes.False ||
                 door.ConnectionType == GenerateRoom.ConnectionTypes.LeaderBoss)
                 return true;
+
+            // The forward door of a miniboss room is inert until that dungeon is completed.
+            // Nothing on the door itself says so — the state lives on a sibling teleporter —
+            // so without this we would route the player to a door that does nothing.
+            if (EndOfRunDoor.IsInert(door)) return true;
 
             // Entrance/Exit opens the world map outside a dungeon. In a dungeon the exact
             // trigger branch exits without doing anything unless one of its explicit return

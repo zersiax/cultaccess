@@ -76,6 +76,13 @@ namespace CultAccess.UI
                     $"Traits/{type}/Name"),
             };
 
+            // The follower summary screen builds two grids from this same tile type — the
+            // follower's own traits and the cult's — under headings a screen reader never
+            // reaches. Without this qualifier the two read identically, which turns a missing
+            // heading into a wrong answer about whose trait it is.
+            var cultTrait = FollowerCardDescriber.IsCultTrait(item);
+            if (cultTrait) parts.Add(Localization.Strings.Get("follower.cult_trait"));
+
             if (SelectableDescriber.Verbosity != Verbosity.Low)
             {
                 // The brain overload personalises the wording for a follower that already
@@ -87,7 +94,8 @@ namespace CultAccess.UI
 
             var description = string.Join(", ", parts.ToArray());
             Plugin.Log.LogInfo(
-                $"[indoctrination] kind=trait type={type} spoken=\"{description}\"");
+                $"[indoctrination] kind=trait type={type} cult={cultTrait} " +
+                $"spoken=\"{description}\"");
             return description;
         }
 

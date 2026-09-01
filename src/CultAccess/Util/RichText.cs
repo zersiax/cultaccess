@@ -226,6 +226,14 @@ namespace CultAccess.Util
             s = PrivateUseGlyph.Replace(s, " ");
             s = PrivateUseEscapeText.Replace(s, " ");
 
+            // The game uses a pipe as a visual separator between two facts on one line, and
+            // sometimes leaves one dangling where a stripped icon used to be. Measured
+            // 2026-08-26: 35 spoken lines carried one, from "Re-Assign |, gozer Lives Here"
+            // to "Role: Devout Worker | Age: 20 Days". A screen reader says "vertical bar".
+            // Turned into a comma so the existing run-collapsing below removes the dangling
+            // ones and keeps the genuine separations as pauses.
+            s = s.Replace('|', ',');
+
             // Line breaks are structure, not silence: give the reader a pause instead.
             s = s.Replace("\r\n", ", ").Replace('\n', ',').Replace('\r', ',');
 
@@ -249,11 +257,27 @@ namespace CultAccess.Util
                     System.StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            if (!string.IsNullOrEmpty(expectedTerm) &&
+            if (string.IsNullOrEmpty(expectedTerm)) return true;
+
+            var term = Clean(expectedTerm);
+            if (string.Equals(clean, term, System.StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            // The term echoed back without its path is the other way a lookup says "no
+            // translation", and comparing against the whole term misses it: asked for
+            // "Structures/COLLECTED_RESOURCES_CHEST" the reply is the bare key, which is not
+            // equal to the term and so passed as a translation.
+            //
+            // Guarded on the reply still looking like an identifier, because the same shape
+            // is a perfectly good answer when it is not one: "Items/Meat" really does
+            // translate to "Meat", and rejecting that would lose a correct name.
+            var separator = term.LastIndexOf('/');
+            if (separator >= 0 &&
                 string.Equals(
                     clean,
-                    Clean(expectedTerm),
-                    System.StringComparison.OrdinalIgnoreCase))
+                    term.Substring(separator + 1),
+                    System.StringComparison.OrdinalIgnoreCase) &&
+                LooksLikeIdentifier(clean))
                 return false;
 
             return true;
@@ -332,5 +356,107 @@ namespace CultAccess.Util
             s = Regex.Replace(s, @"(?<=[a-z0-9])(?=[A-Z])", " ");
             return Whitespace.Replace(s, " ").Trim();
         }
+
+        /// <summary>
+        /// <see cref="Humanise"/> for something known to be an untranslated key, which may
+        /// additionally be shouted: "COLLECTED_RESOURCES_CHEST" becomes "Collected Resources
+        /// Chest" rather than "COLLECTED RESOURCES CHEST".
+        ///
+        /// Deliberately not folded into <see cref="Humanise"/>, and the offline harness is why.
+        /// Doing it there title-cased a follower called PETERI into "Peteri" — the player named
+        /// them that, in caps, on purpose. Casing can only be corrected where the caller knows
+        /// the string is a key rather than a name, and the caller that knows is the one that
+        /// has just failed to find a translation for it.
+        ///
+        /// Only when nothing in it is lower case already, so "Hub1_Swamp" and "Shrine II" are
+        /// untouched. A lone genuine acronym would become "Hp"; no key in this game is one, and
+        /// a mis-cased acronym is a smaller harm than a shouted key.
+        /// </summary>
+        public static string HumaniseKey(string identifier)
+        {
+            var humanised = Humanise(identifier);
+            return LooksShouted(humanised) ? TitleCase(humanised) : humanised;
+        }
+
+        /// <summary>All the letters are upper case and there is more than one of them.</summary>
+        private static bool LooksShouted(string text)
+        {
+            var letters = 0;
+            foreach (var character in text)
+            {
+                if (!char.IsLetter(character)) continue;
+                if (char.IsLower(character)) return false;
+                letters++;
+            }
+
+            return letters > 1;
+        }
+
+        /// <summary>Untranslated keys look like this even after their separators are gone.</summary>
+        private static bool LooksLikeIdentifier(string text) =>
+            text.IndexOf('_') >= 0 || LooksShouted(text);
+
+        private static string TitleCase(string text)
+        {
+            var builder = new System.Text.StringBuilder(text.Length);
+            var startOfWord = true;
+
+            foreach (var character in text)
+            {
+                if (!char.IsLetter(character))
+                {
+                    builder.Append(character);
+                    startOfWord = true;
+                    continue;
+                }
+
+                builder.Append(startOfWord
+                    ? char.ToUpperInvariant(character)
+                    : char.ToLowerInvariant(character));
+                startOfWord = false;
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// Whether <paramref name="needle"/> appears in <paramref name="haystack"/> as whole
+        /// words rather than as any substring.
+        ///
+        /// The distinction is the whole point: "Cook" is a substring of "Cooking Fire", so a
+        /// plain containment test would throw away the action and leave the player with a
+        /// building and no verb. It is not a whole word there, and it is in "Meal Bad Meat".
+        /// </summary>
+        public static bool ContainsWord(string haystack, string needle)
+        {
+            if (string.IsNullOrEmpty(haystack) || string.IsNullOrEmpty(needle)) return false;
+
+            var index = 0;
+            while ((index = haystack.IndexOf(
+                       needle, index, System.StringComparison.OrdinalIgnoreCase)) >= 0)
+            {
+                var startsCleanly = index == 0 || !char.IsLetterOrDigit(haystack[index - 1]);
+                var end = index + needle.Length;
+                var endsCleanly = end >= haystack.Length || !char.IsLetterOrDigit(haystack[end]);
+                if (startsCleanly && endsCleanly) return true;
+
+                index++;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Drop trailing separators and sentence punctuation from a label.
+        ///
+        /// Two observed defects, one fix. A label that is really a description ends in a full
+        /// stop, and the sentences these are composed into add their own, so the player heard
+        /// "Guiding to the chest.." — and one game label ends in a bare pipe, which is layout
+        /// debris rather than text. Anything ending in a letter, digit or bracket is untouched.
+        /// </summary>
+        public static string TrimTrailingPunctuation(string text) =>
+            string.IsNullOrEmpty(text)
+                ? text
+                : text.TrimEnd(' ', '	', '.', ',', ';', ':', '|', '-', '/');
     }
 }

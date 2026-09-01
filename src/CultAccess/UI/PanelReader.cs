@@ -84,6 +84,18 @@ namespace CultAccess.UI
             // The menu may have been closed again inside the grace period.
             if (menu == null || !menu.gameObject.activeInHierarchy) return;
 
+            // Measured 2026-08-25: the player opened the Cult page and never pressed the panel
+            // key there, which is the expected behaviour — nothing about that screen suggests
+            // it. Auto-read is the path that actually reaches those statistics, and it went
+            // straight to the generic collector, so the describer was never consulted. Only
+            // this one adapter is tried here, deliberately: the others already behave as
+            // intended on this path and widening it would change unrelated panels.
+            if (CultPageDescriber.TryDescribePanel(menu, out var cultPage))
+            {
+                Speaker.Say(cultPage, SpeechPriority.Queued);
+                return;
+            }
+
             var body = CollectBodyText(menu);
             if (body.Length == 0) return;
 
@@ -155,6 +167,15 @@ namespace CultAccess.UI
             if (RitualDoctrineDescriber.TryDescribePanel(menu, out var doctrine))
             {
                 Speaker.Say(doctrine);
+                return;
+            }
+
+            // Before the generic collector: the cult pages are numbers and bars that belong to
+            // no control, so the fallback would recite a string of digits with nothing to say
+            // which is which.
+            if (CultPageDescriber.TryDescribePanel(menu, out var cultPage))
+            {
+                Speaker.Say(cultPage);
                 return;
             }
 

@@ -10,7 +10,7 @@ TESTING.txt have never been confirmed by anyone but the author.
 WHAT YOU NEED
 -------------
 
-  - Cult of the Lamb on Steam, on Windows.
+  - Cult of the Lamb on Steam, on Windows.  GOG should work as well but does not currently auto-detect.
   - BepInEx, which is NOT in this package and which you download once. See below.
   - A screen reader. NVDA is what the mod targets and supports best.
 
@@ -34,10 +34,7 @@ says ERR_SSL_PROTOCOL_ERROR, and Firefox says "SSL received a record that
 exceeded the maximum permissible length". Both mean the reply was not encrypted
 traffic at all, which is what a block page looks like on a secure connection.
 
-The name to allow is gcdn.thunderstore.io. That is the server the file actually comes from; the link
-starts at thunderstore.io and redirects there, so allowing only the first name is
-not enough. Add both as exclusions, or turn off your security software's web or
-HTTPS scanning for a minute.
+The name to allow is gcdn.thunderstore.io. 
 
 If your browser reports ERR_SSL_PROTOCOL_ERROR or "the connection is not secure"
 on that link, nothing is wrong with the file. Your security software is

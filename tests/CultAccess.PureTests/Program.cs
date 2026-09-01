@@ -33,6 +33,15 @@ internal static class Program
             "<sprite name=\"The One\"><sprite name=\"img_Swirley_Right\">",
             "The One Who Waits");
 
+        // The game separates two facts on one line with a pipe, and leaves one dangling where
+        // an icon was stripped. A screen reader says "vertical bar" for both.
+        AssertClean("dangling pipe before a comma", "Re-Assign |, gozer Lives Here",
+            "Re-Assign, gozer Lives Here");
+        AssertClean("pipe separating two facts", "Role: Devout Worker | Age: 20 Days",
+            "Role: Devout Worker, Age: 20 Days");
+        AssertClean("pipe inside brackets", "( Day 54 | 2 x Followers )",
+            "( Day 54, 2 x Followers )");
+
         Assert(
             !RichText.IsUsableLocalization(
                 "Structures/PLACEMENT_REGION", "Structures/PLACEMENT_REGION"),
@@ -197,6 +206,79 @@ internal static class Program
             RouteGuidanceText.DirectLine("east", "Darkwood", "1.2 metres") ==
             "Continue east for 1.2 metres to Darkwood, direct line.",
             "direct-line fallback must remain a complete movement instruction");
+
+        // Names heard in the 2026-08-23 base session, and what each was wrong about.
+        Assert(
+            RichText.HumaniseKey("COLLECTED_RESOURCES_CHEST") == "Collected Resources Chest",
+            "a SCREAMING_SNAKE key must not reach the player still shouting");
+        Assert(
+            RichText.HumaniseKey("Hub1_Swamp") == "Hub1 Swamp",
+            "an identifier that already has lower case must be left exactly as it is");
+        Assert(
+            RichText.Humanise("PETERI") == "PETERI",
+            "plain Humanise must never re-case: a follower named in caps meant it");
+        Assert(
+            RichText.Humanise("BuildSite") == "Build Site",
+            "camel case splitting must survive the title-casing change");
+
+        Assert(
+            !RichText.IsUsableLocalization(
+                "COLLECTED_RESOURCES_CHEST", "Structures/COLLECTED_RESOURCES_CHEST"),
+            "the term echoed back without its path is a missing translation, not a name");
+        Assert(
+            RichText.IsUsableLocalization("Meat", "Items/Meat"),
+            "a real translation that happens to equal the last path segment must be kept");
+
+        Assert(
+            RichText.ContainsWord("Meal Bad Meat", "Meal"),
+            "a label repeated as a whole word in the name is redundant");
+        Assert(
+            !RichText.ContainsWord("Cooking Fire", "Cook"),
+            "a label that is merely a substring of the name is still the action");
+
+        Assert(
+            RichText.TrimTrailingPunctuation(
+                "Followers deposit resources here while you are away.") ==
+            "Followers deposit resources here while you are away",
+            "a description used as a label must not bring its full stop into the sentence");
+        Assert(
+            RichText.TrimTrailingPunctuation("Assign |") == "Assign",
+            "layout debris on the end of a label must not be spoken");
+        Assert(
+            RichText.TrimTrailingPunctuation("Receive Devotion 12 / 70") ==
+            "Receive Devotion 12 / 70",
+            "a label ending in a digit must be left alone");
+
+        // Autowalk yields to the player between its own deadzone and the game's movement
+        // threshold of 0.3. That band is the whole point: the player is pushing, the game is
+        // not moving them yet, and driving through it would steer against them.
+        Assert(
+            !AutowalkPolicy.PlayerIsSteering(0f, 0f),
+            "a stick at rest must not be read as the player taking over");
+        Assert(
+            !AutowalkPolicy.PlayerIsSteering(0.1f, -0.1f),
+            "stick noise below the deadzone must not interrupt autowalk");
+        Assert(
+            AutowalkPolicy.PlayerIsSteering(0f, -0.25f),
+            "input the game has not yet acted on must still hand control back");
+        Assert(
+            AutowalkPolicy.PlayerIsSteering(-1f, 0f),
+            "a single axis held hard is steering even though the pair is short");
+
+        var progress = new AutowalkProgress();
+        progress.Reset(0f, 0f, 0f);
+        Assert(
+            !progress.Observe(AutowalkPolicy.StuckSeconds + 1f, 0f, 5f),
+            "covering ground must never be reported as stuck, however long it took");
+        Assert(
+            !progress.Observe(AutowalkPolicy.StuckSeconds + 1.5f, 0f, 5f),
+            "the clock must restart from the last real progress, not from engagement");
+        Assert(
+            progress.Observe(AutowalkPolicy.StuckSeconds * 2f + 1f, 0f, 5.1f),
+            "a whole interval pinned against something must be reported");
+        Assert(
+            !progress.Observe(AutowalkPolicy.StuckSeconds * 2f + 1.1f, 0f, 5.1f),
+            "one report per stuck interval, not one per frame");
 
         var fullHealth = new HealthSnapshot(6f, 6f, 0f, 0f, 0f, 0f, 0f, 0f);
         var damagedHealth = new HealthSnapshot(5f, 6f, 0f, 0f, 0f, 0f, 0f, 0f);
@@ -368,7 +450,31 @@ internal static class Program
             Strings.Plural("duration.second", "duration.seconds", 38) == "38 seconds",
             "plural selection must pick the right key for the count");
 
+
+        // A walking instruction that points into something the wall cue is already reporting
+        // must say so. The two subsystems were describing the same moment and contradicting
+        // each other, and the words won because they sound more specific than a tone.
+        Assert(
+            RouteGuidanceText.Step(
+                "north east", "1.6 metres", "Old Faith passage", "14 metres",
+                finalStep: false, isTurn: false, isFirstInstruction: false,
+                blockedAhead: true) ==
+            "Continue north east for 1.6 metres. Old Faith passage, 14 metres remaining. " +
+            "Blocked that way.",
+            "an instruction pointing into a wall the sonar has hit must say it is blocked");
+        Assert(
+            !RouteGuidanceText.Step(
+                "north east", "1.6 metres", "Old Faith passage", "14 metres",
+                finalStep: false, isTurn: false, isFirstInstruction: false).Contains("Blocked"),
+            "an unobstructed instruction is unchanged");
+        Assert(
+            RouteGuidanceText.DirectLine("north", "the door", "2 metres", blockedAhead: true)
+                .EndsWith("Blocked that way."),
+            "the final direct approach carries the warning too, which is where a doorway is");
+
         AssertLocalizationFiles();
+        AssertCultStatus();
+        AssertFollowerStatus();
 
         AudioTests.Run(Assert);
         ConfigMenuTests.Run(Assert);
@@ -460,6 +566,204 @@ internal static class Program
             Strings.Initialize(null, "en");
             try { System.IO.Directory.Delete(root, true); } catch { }
         }
+    }
+
+    /// <summary>
+    /// The cult bars. What is worth pinning is not the arithmetic but the policy: a bar the
+    /// player has not unlocked is silent, a frozen bar is never a warning, and the crossing
+    /// sentence names the consequence the game's own simulation will produce.
+    /// </summary>
+    private static void AssertCultStatus()
+    {
+        var healthy = Bar(CultBarKind.Faith, 0.6f);
+        var low = Bar(CultBarKind.Faith, 0.2f);
+        var hidden = new CultBar(CultBarKind.Warmth, 0.1f, shown: false, locked: false);
+        var locked = new CultBar(CultBarKind.Food, 0.1f, shown: true, locked: true);
+
+        Assert(!healthy.Low, "a bar above a quarter is not low");
+        Assert(low.Low, "a bar below a quarter is low");
+        Assert(!hidden.Low, "a bar the player has not unlocked cannot be low");
+        Assert(
+            !locked.Low,
+            "a frozen bar must never read as a warning: it cannot move, so nothing is coming");
+
+        var snapshot = new CultStatusSnapshot(
+            low, Bar(CultBarKind.Food, 0.8f), Bar(CultBarKind.Cleanliness, 0.5f), hidden,
+            followers: 7, dead: 2);
+        var status = CultStatusText.Status(snapshot);
+        Assert(
+            status == "Faith 20 percent. Food 80 percent. Cleanliness 50 percent. 7 followers, 2 dead.",
+            "the full readout must skip a locked-out bar and name the population: " + status);
+
+        var oneAlive = new CultStatusSnapshot(
+            healthy, hidden, hidden, hidden, followers: 1, dead: 0);
+        Assert(
+            CultStatusText.Status(oneAlive) == "Faith 60 percent. 1 follower.",
+            "a single follower must not be pluralised and no dead count is spoken at zero");
+
+        Assert(
+            CultStatusText.Status(new CultStatusSnapshot(
+                hidden, hidden, hidden, hidden, 0, 0)) == "The cult has no bars yet.",
+            "a cult with nothing revealed must say so rather than read an empty sentence");
+
+        Assert(
+            CultStatusText.Alerts(snapshot) == "Faith low",
+            "the where-am-I clause names only the bars that are actually low");
+        Assert(
+            CultStatusText.Alerts(oneAlive).Length == 0,
+            "the where-am-I clause must add nothing at all when every bar is healthy");
+        Assert(
+            CultStatusText.Alerts(new CultStatusSnapshot(
+                low, Bar(CultBarKind.Food, 0.1f), Bar(CultBarKind.Cleanliness, 0.9f), hidden,
+                3, 0)) == "Faith, Food low",
+            "several low bars are named in one clause");
+
+        Assert(
+            CultStatusText.Crossing(CultBarKind.Faith, 0.2f, low: true) ==
+            "Faith low, 20 percent. Followers will start to dissent.",
+            "a crossing must name what the game will now start doing");
+        Assert(
+            CultStatusText.Crossing(CultBarKind.Cleanliness, 0.19f, low: true) ==
+            "Cleanliness low, 19 percent. Followers will start to fall ill.",
+            "each bar names its own consequence");
+        Assert(
+            CultStatusText.Crossing(CultBarKind.Warmth, 0.2f, low: true) == "Warmth low, 20 percent.",
+            "warmth claims no consequence, because its own simulation step does nothing");
+        Assert(
+            CultStatusText.Crossing(CultBarKind.Faith, 0.31f, low: false) ==
+            "Faith back up, 31 percent.",
+            "recovery is reported plainly");
+
+        Assert(
+            CultStatusText.LockChanged(CultBarKind.Faith, locked: true) ==
+            "Faith is locked and cannot change.",
+            "a frozen bar is reported as frozen");
+
+        // The underlying floats overshoot their own limits slightly; a bar reading 101 or
+        // minus 1 percent would sound like a defect rather than a full or empty one.
+        Assert(CultStatusText.Percent(1.004f) == 100, "percentages clamp at 100");
+        Assert(CultStatusText.Percent(-0.02f) == 0, "percentages clamp at 0");
+    }
+
+    private static CultBar Bar(CultBarKind kind, float value) =>
+        new CultBar(kind, value, shown: true, locked: false);
+
+    /// <summary>
+    /// One follower. The assertions that matter are the hidden bars: the game itself does not
+    /// show loyalty for a mutated follower, or food and health for a dead one, and speaking
+    /// them would be more than equal access rather than less.
+    /// </summary>
+    private static void AssertFollowerStatus()
+    {
+        // Identity in a list. The species is what a sighted player picks a follower out by
+        // from across the base, and level 1 is left unsaid because everyone starts there and
+        // it would put the same three words in front of every entry.
+        Assert(
+            FollowerStatusText.Identity("Sinterklaas", "Goat", 4) == "Sinterklaas the level 4 Goat",
+            "a levelled follower is named, levelled and formed in one phrase");
+        Assert(
+            FollowerStatusText.Identity("Sinterklaas", "Goat", 1) == "Sinterklaas the Goat",
+            "level 1 is not spoken, because it distinguishes nobody");
+        Assert(
+            FollowerStatusText.Identity("Sinterklaas", "", 4) == "Sinterklaas, level 4",
+            "an unnamed form falls back to name and level rather than a dangling article");
+        Assert(
+            FollowerStatusText.Identity("Sinterklaas", "", 1) == "Sinterklaas",
+            "with neither form nor level there is nothing to add to the name");
+        Assert(
+            FollowerStatusText.Identity("", "Goat", 4) == "Follower details unavailable",
+            "a follower with no name says so rather than reading as a bare form");
+
+        Assert(
+            FollowerStatusText.TargetEntry(
+                "Sinterklaas the level 4 Goat", "Ill", "quest to complete", detailed: true) ==
+            "Sinterklaas the level 4 Goat, Ill, quest to complete",
+            "a list entry reads identity, then condition, then what to do about it");
+        Assert(
+            FollowerStatusText.TargetEntry(
+                "Sinterklaas", "Ill", "quest to complete", detailed: false) == "Sinterklaas",
+            "at low verbosity a list entry carries neither condition nor headline");
+        Assert(
+            FollowerStatusText.TargetEntry("Towel", "", "", detailed: true) == "Towel",
+            "a follower with nothing wrong and nothing to offer adds no empty clauses");
+
+        var full = new FollowerSnapshot
+        {
+            Name = "Sinterklaas",
+            Species = "Goat",
+            Role = "Farmer",
+            Level = 3,
+            Headline = "quest to complete",
+            Condition = "Ill",
+            BiggestNeed = "Nowhere to sleep",
+            Task = "chop trees",
+            LoyaltyShown = true, Loyalty = 40,
+            NeedsShown = true, Food = 72, Health = 100,
+            TraitCount = 2,
+            Disciple = true,
+            MarriedToLeader = true,
+            Age = 12,
+            MemberDays = 18,
+        };
+
+        Assert(
+            FollowerStatusText.Card(full, detailed: false) == "Sinterklaas the level 3 Goat",
+            "a low-verbosity tile is the identity and nothing else");
+        Assert(
+            FollowerStatusText.Card(full, detailed: true) ==
+            "Sinterklaas the level 3 Goat, Farmer, Ill, loyalty 40 percent, food 72 percent, " +
+            "health 100 percent",
+            "a tile leads with the name and then reads the bars a sighted player sees beside it");
+        Assert(
+            FollowerStatusText.Detail(full) ==
+            "Sinterklaas the level 3 Goat, Farmer, Ill, loyalty 40 percent, food 72 percent, " +
+            "health 100 percent, quest to complete, needs Nowhere to sleep, doing chop trees, " +
+            "2 traits, disciple, married to you, age 12, in the cult 18 days",
+            "the on-demand reading adds the headline, the need, the task and the relationships");
+
+        var dead = new FollowerSnapshot
+        {
+            Name = "Towel",
+            Alive = false,
+            LoyaltyShown = true, Loyalty = 100,
+            NeedsShown = false, Food = 50, Health = 50,
+            MemberDays = 0,
+        };
+        var deadText = FollowerStatusText.Detail(dead);
+        Assert(
+            deadText.Contains("dead") && deadText.Contains("loyalty 100 percent"),
+            "a dead follower keeps the one bar their card still shows");
+        Assert(
+            !deadText.Contains("food") && !deadText.Contains("health"),
+            "a dead follower's card hides food and health, so neither may be spoken");
+        Assert(
+            deadText.Contains("new to the cult"),
+            "a follower who joined today is described as new rather than as zero days");
+
+        var mutated = new FollowerSnapshot
+        {
+            Name = "Peteri",
+            LoyaltyShown = false, Loyalty = 90,
+            NeedsShown = true, Food = 30, Health = 80,
+            Unavailable = "unavailable, dissenting",
+            MemberDays = 1,
+        };
+        var mutatedText = FollowerStatusText.Card(mutated, detailed: true);
+        Assert(
+            !mutatedText.Contains("loyalty"),
+            "loyalty is hidden for a mutated follower on screen and must be hidden in speech");
+        Assert(
+            mutatedText.StartsWith("Peteri, unavailable, dissenting"),
+            "the reason a follower cannot be chosen follows the name immediately, " +
+            "because it is what the player is deciding on: " + mutatedText);
+        Assert(
+            FollowerStatusText.Detail(mutated).Contains("in the cult 1 day"),
+            "a one-day membership is not pluralised");
+
+        Assert(
+            FollowerStatusText.Card(null, detailed: true) == "Follower details unavailable" &&
+            FollowerStatusText.Detail(new FollowerSnapshot()) == "Follower details unavailable",
+            "an unreadable follower says so rather than reading as an empty line");
     }
 
     private static void Assert(bool condition, string message)

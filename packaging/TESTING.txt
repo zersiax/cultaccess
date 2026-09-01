@@ -16,8 +16,10 @@ location and what the game is waiting for. You will hear "Log marker 1", "Log
 marker 2" and so on. Afterwards just say "marker 3 was the animation I could not
 identify" and the exact moment can be found.
 
-This one key has already turned two "I have no idea what happened" reports into
-precise diagnoses. Use it freely; it costs nothing.
+It also writes down every follower standing near you and what each one is doing,
+so "a lot of follower animation was happening and I could not tell what" is now
+a question a single press answers.
+
 
 
 THE LOG
@@ -36,12 +38,19 @@ KEYS
 ----
 
   F1   help, one section per press. Start here; it lists everything.
+  F2   the mod's own settings menu
+  F3   how your cult is doing: faith, food, cleanliness and warmth, then how
+       many followers you have and how many have died
+  F4   describe one follower in full - loyalty, food, health, what is wrong
+       with them, what they are doing, traits, marriage, age. Describes the
+       follower selected in the target list, or the nearest one
+  F5   while placing a building, says which way the nearest cell is that the
+       structure will actually fit in. It doesn't move you there, just tells you how to get there yourself.
+
   F7   mark the log (see above)
   F8   read the open panel
   F9   which speech backend is in use
   F10  stop speech
-  F5   while placing a building, says which way the nearest cell is that the
-       structure will actually fit in
   F11  repeat the last thing said
   F12  where am I: health, fervour, tarot, day and time, current objective
 
@@ -53,43 +62,92 @@ KEYS
   ' (quote)     repeat the current direction
   . (period)     nearby enemies
   , (comma)     point the beacon at an enemy
+  delete        autowalk: walk the route for you; press again to stop
+
+CONTROLLER
+----------
+
+Added in 0.2.0 and still lightly tested, so worth your time if you use a pad.
+
+Hold the LEFT TRIGGER and the pad becomes the mod's hotkeys. The left trigger is
+the only button this game leaves unused, so everything is a chord with it held. You can still walk with it held down, but that's all you can do until you let go.
+
+
+  d-pad up / down       previous / next target
+  d-pad left / right    change the target filter (empty ones are skipped)
+  A                     start or stop walking guidance
+  B                     list nearby enemies
+  X                     point the beacon at the next enemy
+  Y                     where am I
+  left shoulder         rescan
+  right shoulder        repeat the walking direction
+  left stick click      autowalk
+  right stick click     stop speech
+  right trigger         repeat the last thing said
+  Back                  help
+  Start                 settings menu
+
+When a fight starts the target filter moves to the enemies by itself and moves
+back when the room is clear, so in combat left and right are already stepping
+enemies, and landing on one points the beacon at it.
+
+All of it is rebindable in the ControllerLayer section of the config file.
 
 
 WHAT IS UNCONFIRMED AND WORTH TRYING
 ------------------------------------
 
-  1. Indoctrinating a new follower. Walk the whole flow: the name field, then
-     Form, Variant and Colour, then the traits. Every tile should name what it
-     is - a form should give its name, whether it is locked, and which biome it
-     comes from; a trait should give its name and what it does. These read as
-     the bare word "button" until very recently, so this is the newest and least
-     proven part of the mod.
-
-  2. The Crown window, reached from the Temple Altar. Each upgrade and fleece
-     should give its name, whether you own it, whether you can afford it, its
-     cost against what you hold, and its description.
-
-  3. Preaching a sermon. At the end you should hear which doctrine it fed, how
+  1. Preaching a sermon. At the end you should hear which doctrine it fed, how
      much was gained, the progress toward the next upgrade, and how many
      followers attended.
 
-  4. Re-educating a dissenter. Each session should say how much dissent is left
+  2. Re-educating a dissenter. Each session should say how much dissent is left
      and roughly how many more daily sessions it needs. It is a seven-day course
      on ONE follower.
 
-  5. A story moment. If the target list goes empty, it should say a story moment
+  3. A story moment. If the target list goes empty, it should say a story moment
      is in progress and repeat what the game wants, rather than just going quiet.
 
-  6. Non-English. If you play in another language, everything the mod says should
+  4. Non-English. If you play in another language, everything the mod says should
      be in that language. All translations are machine drafts - please flag
      anything a native speaker would object to, especially where the mod's word
      for Shrine, Devotion or Sermon differs from the game's own word.
 
-  7. Twitch, only if you stream. Connect from the pause menu, not the main menu -
+  5. Twitch, only if you stream. Connect from the pause menu, not the main menu -
      the connection belongs to the save file. During a Help or Hinder vote the
      mod should say chat is voting and that the base gate is held shut, then say
      what chat chose.
 
+  6. Flying worms and the diving maggot miniboss. Both should now buzz a warning
+     before they hit you - the worm's telegraph is a full second, the longest of
+     any enemy. The maggot's warning is aimed at where it will LAND rather than
+     at the maggot, because it crosses the room mid-leap. Neither has ever been
+     heard by anyone; they are written from the game's code alone.
+
+  7. A miniboss fight. Two things to listen for. "Room clear" used to fire two or
+     three times during one of these, between waves; it should now only be said
+     when the room has genuinely stayed empty. And the forward door of that room
+     should say it is sealed and that this is the last room of the run, rather
+     than being offered as an exit that does nothing.
+
+  8. Spawners. Some enemies generate the others - killing the spawner kills
+     everything it made and ends the fight, and its spawn are worth no
+     experience. Those are announced as "spawner" and put first in the enemy
+     roster and the enemies filter. Tell me if one is missed or mislabelled.
+
+  9. Health during a long fight. Announcements of damage are now spaced out so
+     they cannot talk over the combat cues, but anything that is NOT more damage
+     - a blue heart, a maximum health increase - should still be announced
+     immediately. Silence there is a bug.
+
+  10. F3 gives you bars but I haven't had a chance to see if the notifications for these falling low actually fire correctly yet.
+
+
+  11. F4, give status of the follower you're targeting when you get to them. There's a lot of moving bits in that readout so particularly localization is a great thing to test.
+
+  12. Give the follower cards a good once-over. Anything sound weird, let me know.
+
+  13. Beeping pickups should now also show up in the pathfinder. If not, send me the log so I can fix :)
 
 WHAT TO INCLUDE IN A REPORT
 ---------------------------
@@ -108,5 +166,15 @@ KNOWN ROUGH EDGES
 
   - Some announcements are still English regardless of your game language. The
     translation migration is partial and known to be so.
-  - Controller is not supported. Keyboard only.
+  - Controller support is new and only the left-trigger layer is covered. The
+    mod's own settings menu still reads the keyboard only, so Start will open it
+    but the pad will not navigate it.
+  - If the mod says at startup that your audio output is not stereo, believe it.
+    Windows can report a surround output on headphones - sometimes after spatial
+    sound has been switched back OFF - and the game's positional sounds then go
+    to speakers that do not exist while music keeps playing.
   - Auto Cook and the Tailor minigame have never been tested by anyone.
+  - Fishing has no audio cues at all yet. Casting is the same shape as cooking
+    and will be cued; reeling is a marker you have to hold inside a moving
+    section, which is a different problem and is being designed rather than
+    bolted on. Reported and scoped, not forgotten.

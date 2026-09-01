@@ -48,6 +48,85 @@ namespace CultAccess.Combat
         }
     }
 
+    /// <summary>
+    /// The Forest Flying Worm. Same shape as the scuttle-swiper and the same evidence:
+    /// <c>EnemyBat.AttackRoutine</c> sets <c>SignPostAttackAnimation</c>, spends a wind-up,
+    /// then switches to <c>AttackAnimation</c> and enables <c>damageColliderEvents</c>.
+    ///
+    /// The wind-up is a literal <c>Duration = 1f</c> in the routine — a full second, the
+    /// longest telegraph of any enemy adapted so far — advanced by <c>Time.deltaTime *
+    /// Spine.timeScale</c>, so hitstop stretches it and the cue only ever lands early.
+    ///
+    /// No instance-type filter, unlike the scuttle-swiper. <c>AttackRoutine</c> is virtual,
+    /// and Harmony patches this declared body: an override that replaces it never reaches
+    /// here, and one that calls <c>base</c> runs this exact timing. The cue is therefore
+    /// honest for every subclass by construction rather than by a list needing maintenance.
+    /// </summary>
+    [HarmonyPatch(typeof(EnemyBat), "AttackRoutine")]
+    internal static class BatMeleeWarningPatch
+    {
+        private const float WindupSeconds = 1f;
+
+        [HarmonyPrefix]
+        private static void BeforeWindup(EnemyBat __instance)
+        {
+            if (__instance == null || __instance.health == null ||
+                __instance.health.team == Health.Team.PlayerTeam)
+                return;
+
+            var target = __instance.GetClosestTarget();
+            if (target == null || !target.isPlayer) return;
+
+            CombatAssist.WarnMelee(__instance.gameObject, WindupSeconds, "flying-worm");
+        }
+    }
+
+    /// <summary>
+    /// The Forest Miniboss Diving Maggot, which took two hits with no warning at all in the
+    /// last session — <c>warningAge=87.0</c>, meaning nothing had fired for a minute and a half.
+    ///
+    /// Its dives all live inside one <c>DiveMoveRoutine</c> coroutine, so a prefix there would
+    /// fire once for a run of three or four leaps. <c>GetNewTargetPosition</c> is the per-dive
+    /// hook: public, called from exactly one place — the top of each loop iteration, right
+    /// before the jump — and its return value is the game's own "this dive is happening".
+    ///
+    /// The lead time is the game's own expression, <c>distance / MoveSpeed</c>, read live so
+    /// the 1.35x <c>MoveSpeed</c> boost the miniboss gives itself in its second phase is
+    /// picked up without anyone having to notice it exists. It is a slight underestimate: the
+    /// routine can sit in a hitstop wait between here and the jump, which only makes the cue
+    /// early.
+    ///
+    /// The warning is aimed at the landing point rather than at the maggot. This attack is
+    /// the reason that option exists — it crosses the room mid-cue, and the damage collider
+    /// is enabled for 0.3 s where it lands, not along the arc.
+    /// </summary>
+    [HarmonyPatch(
+        typeof(EnemyMaggotMiniBoss), nameof(EnemyMaggotMiniBoss.GetNewTargetPosition))]
+    internal static class MaggotMiniBossDiveWarningPatch
+    {
+        [HarmonyPostfix]
+        private static void AfterTargetChosen(
+            EnemyMaggotMiniBoss __instance, bool __result, Vector3 ___TargetPosition)
+        {
+            if (!__result || __instance == null || __instance.health == null ||
+                __instance.health.team == Health.Team.PlayerTeam)
+                return;
+
+            var speed = __instance.MoveSpeed;
+            if (speed <= 0f) return;
+
+            // Mirrors DiveMoveRoutine exactly, including using the full 3D distance the game
+            // uses to derive the same Duration. The landing point handed to the cue is
+            // flattened, because that is where the damage lands.
+            var travel = Vector3.Distance(__instance.transform.position, ___TargetPosition);
+            var landing = ___TargetPosition;
+            landing.z = 0f;
+
+            CombatAssist.WarnMelee(
+                __instance.gameObject, travel / speed, "diving-maggot", landing);
+        }
+    }
+
     [HarmonyPatch(typeof(Projectile), "Awake")]
     internal static class ProjectileRadiusPatch
     {

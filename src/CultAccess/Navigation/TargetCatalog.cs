@@ -17,8 +17,59 @@ namespace CultAccess.Navigation
         private static int _index = -1;
         private static int _categoryIndex;
 
+        /// <summary>Seconds before a contradiction may ask for another scan of its own.</summary>
+        private const float SelfHealCooldown = 5f;
+
+        private static float _lastSelfHealAt = float.NegativeInfinity;
+
+        /// <summary>
+        /// Ask for a fresh scan because what is on hand cannot be right.
+        ///
+        /// Rate limited, and it has to be: Refresh applies the category again on its way out,
+        /// so a filter still empty afterwards would re-arm the scan it had just finished and
+        /// spend 57 ms doing it, forever.
+        /// </summary>
+        private static void RequestSelfHeal(string reason)
+        {
+            if (UnityEngine.Time.unscaledTime - _lastSelfHealAt <= SelfHealCooldown) return;
+
+            _lastSelfHealAt = UnityEngine.Time.unscaledTime;
+            Navigator.MarkCatalogueStale(reason, settle: 0f);
+        }
+
         private static TargetCategory CurrentCategory =>
             TargetCategoryPolicy.At(_categoryIndex);
+
+        /// <summary>Which filter is live. Read so combat can put it back afterwards.</summary>
+        internal static TargetCategory Category => CurrentCategory;
+
+        /// <summary>
+        /// Jump straight to a category rather than cycling to it.
+        ///
+        /// Cycling is right when the player is browsing; it is wrong when something has
+        /// happened that makes one category the obvious one, because nine presses to reach
+        /// "enemies" after a fight starts is nine presses nobody makes. Silent by default:
+        /// the caller usually has a better sentence to fold this into than this class does.
+        /// </summary>
+        internal static void SelectCategory(TargetCategory category, bool announce = false)
+        {
+            var index = TargetCategoryPolicy.IndexOf(category);
+            if (index < 0 || index == _categoryIndex) return;
+
+            _categoryIndex = index;
+            if (Scanned.Count == 0)
+            {
+                Refresh(announce);
+                return;
+            }
+
+            ApplyCategory();
+            if (!announce) return;
+
+            Speaker.Say(Targets.Count == 0
+                ? EmptyCategoryMessage()
+                : $"{CategoryName}, {Targets.Count}. {Describe(Targets[0])}");
+        }
 
         public static PointOfInterest Selected =>
             _index >= 0 && _index < Targets.Count ? Targets[_index] : null;
@@ -75,25 +126,56 @@ namespace CultAccess.Navigation
         /// Step the category filter. Wraps in both directions, so a player who has gone one
         /// too far does not have to walk the whole list round again to get back.
         /// </summary>
+        /// <summary>
+        /// Step to the next filter that actually has something in it.
+        ///
+        /// Empty filters used to be stepped onto and announced. In a dungeon almost all of
+        /// them are empty — a session log had 85 filter presses produce 37 "Nothing nearby
+        /// in ..." replies, followers and story and quests and facilities in turn — so nearly
+        /// half of every press bought nothing. Cheap cycling on the controller is what made
+        /// that intolerable rather than merely untidy.
+        ///
+        /// Skipping is safe because nothing is hidden: a filter is passed over only when it
+        /// holds no targets, so there is nothing behind it to miss. Everything is the
+        /// backstop when the whole world is empty, so the cycle can always land somewhere and
+        /// the player still hears why.
+        /// </summary>
         public static void CycleCategory(int direction = 1)
         {
-            var count = TargetCategoryPolicy.Count;
-            _categoryIndex = ((_categoryIndex + direction) % count + count) % count;
-
             if (Scanned.Count == 0)
             {
+                _categoryIndex = Step(_categoryIndex, direction);
                 Refresh();
                 return;
             }
 
-            ApplyCategory();
-            if (Targets.Count == 0)
+            var step = direction < 0 ? -1 : 1;
+            var index = _categoryIndex;
+
+            for (var attempt = 0; attempt < TargetCategoryPolicy.Count; attempt++)
             {
-                Speaker.Say(EmptyCategoryMessage());
-                return;
+                index = Step(index, step);
+                _categoryIndex = index;
+                ApplyCategory();
+
+                if (Targets.Count > 0)
+                {
+                    Speaker.Say($"{CategoryName}, {Targets.Count}. {Describe(Targets[0])}");
+                    return;
+                }
             }
 
-            Speaker.Say($"{CategoryName}, {Targets.Count}. {Describe(Targets[0])}");
+            // Every filter is empty, so there is nothing to skip to. Land on Everything and
+            // say so rather than leaving the player on whichever one the loop stopped at.
+            _categoryIndex = TargetCategoryPolicy.IndexOf(TargetCategory.Everything);
+            ApplyCategory();
+            Speaker.Say(EmptyCategoryMessage());
+        }
+
+        private static int Step(int index, int direction)
+        {
+            var count = TargetCategoryPolicy.Count;
+            return ((index + direction) % count + count) % count;
         }
 
         public static void Cycle(int direction)
@@ -114,6 +196,12 @@ namespace CultAccess.Navigation
                 Refresh();
                 return;
             }
+
+            // Landing on an enemy points the beacon at it. Stepping the list and locking the
+            // beacon were two separate gestures on two separate keys, which is affordable at a
+            // keyboard and is not affordable mid-fight on a pad. Silent — the beacon starting
+            // is its own announcement, and the target has just been named.
+            if (target.Kind == PoiKind.Enemy) Combat.EnemyRadar.LockBeaconOn(target.Transform);
 
             // Name first, position last. Stepping through a list, the name is what the player
             // is listening for and the position is confirmation; leading with the number makes
@@ -180,6 +268,16 @@ namespace CultAccess.Navigation
                 CurrentCategory == TargetCategory.ActionsNow)
             {
                 AddCuratedCategory();
+
+                // Everything holding nothing while the scan holds something is a
+                // contradiction: those entries exist and not one of them is still alive or
+                // valid, which only happens when the scan is describing somewhere the player
+                // has left. Observed with three dead entries and every single filter empty.
+                // Cheaper and more reliable than trying to predict every way a room can end.
+                if (CurrentCategory == TargetCategory.Everything &&
+                    Targets.Count == 0 && Scanned.Count > 0)
+                    RequestSelfHeal("everything-empty-but-scanned");
+
                 FinishCategory();
                 return;
             }
@@ -197,7 +295,49 @@ namespace CultAccess.Navigation
                 if (!TargetCategoryPolicy.Matches(CurrentCategory, poi)) continue;
                 Targets.Add(poi);
             }
+
+            if (CurrentCategory == TargetCategory.Enemies)
+            {
+                OrderEnemies();
+
+                // Combat can start faster than a new room's scan settles, and the automatic
+                // switch to this filter then applied the previous room's scan: a session log
+                // has `enemies scanned=5 shown=0` immediately before "Combat, 2 enemies.
+                // Targets: enemies." — announcing a list and handing over an empty one.
+                //
+                // The contradiction is its own trigger, so this costs a scan only when the
+                // catalogue is demonstrably wrong rather than on a timer.
+                // Rate limited, and it has to be: Refresh applies the category again on the
+                // way out, so an enemies filter that is still empty afterwards — everything
+                // out of scan range, say — would otherwise re-arm the scan it just finished
+                // and spend 57 ms doing it, forever.
+                if (Targets.Count == 0 && Combat.CombatLifecycle.InCombat)
+                    RequestSelfHeal("enemies-filter-empty-in-combat");
+            }
+
             FinishCategory();
+        }
+
+        /// <summary>
+        /// Put spawners at the top of the enemy list.
+        ///
+        /// Killing a spawner kills everything it produced and ends the fight; killing its
+        /// brood achieves nothing and the brood is worth no experience. So it is the one
+        /// target in the room worth reaching, and leaving it partway down a list that is
+        /// stepped one press at a time is close to not offering it. Order within each group
+        /// is left as scanned, which is nearest-first.
+        /// </summary>
+        private static void OrderEnemies()
+        {
+            var insertAt = 0;
+            for (var i = 0; i < Targets.Count; i++)
+            {
+                if (!Combat.EnemySpawners.IsSpawner(Targets[i].Transform)) continue;
+
+                var spawner = Targets[i];
+                Targets.RemoveAt(i);
+                Targets.Insert(insertAt++, spawner);
+            }
         }
 
         private static void FinishCategory()

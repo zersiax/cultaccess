@@ -21,7 +21,9 @@ namespace CultAccess.Audio
     ///   did before this existed until someone opts in, one category at a time.
     /// - **Distance is carried by volume, steeply.** Things are inaudible until close, so an
     ///   empty room is silent and a wall alongside you is obvious. See
-    ///   <see cref="SoundscapeFalloff"/>.
+    ///   <see cref="SoundscapeFalloff"/>. Enemies are the exception and carry it by repeat rate
+    ///   as well, because for them distance is time-critical and volume alone neither resolved
+    ///   a closing threat nor survived a busy mix — see <see cref="EnemyProximity"/>.
     /// - **There is a hard ceiling on how much can sound.** Per category, and across all of
     ///   them together, because a boss arena can put fifty objects inside the radius.
     /// </summary>
@@ -114,7 +116,15 @@ namespace CultAccess.Audio
         /// Stop anything that sustains. The pulsed categories need no stopping - they simply
         /// are not started again - but the wall ring does.
         /// </summary>
-        internal static void Silence() => WallSonar.Reset();
+        internal static void Silence()
+        {
+            WallSonar.Reset();
+
+            // Enemy pings are one-shots and need no stopping, but their per-hostile schedules
+            // do need clearing: a due time left in the past would fire the whole set at once
+            // the moment play resumed.
+            EnemyProximity.Reset();
+        }
 
         internal static void Reset()
         {
@@ -124,6 +134,7 @@ namespace CultAccess.Audio
             _budgetSpent = 0;
             _budgetWindowEndsAt = 0f;
             WallSonar.Reset();
+            EnemyProximity.Reset();
         }
 
         /// <summary>
@@ -153,6 +164,7 @@ namespace CultAccess.Audio
             RefreshBudget();
 
             if (!CueSettings.Enabled(CueId.AmbientWall)) WallSonar.Reset();
+            if (!CueSettings.Enabled(CueId.AmbientEnemy)) EnemyProximity.Reset();
 
             var origin = player.transform.position;
             foreach (var cue in Priority)
@@ -166,6 +178,16 @@ namespace CultAccess.Audio
                     // and it sustains rather than repeating, so it neither uses the repeat
                     // timer nor draws on the per-second budget.
                     WallSonar.Tick(player, settings);
+                    continue;
+                }
+
+                if (cue == CueId.AmbientEnemy)
+                {
+                    // Enemies keep a schedule per hostile rather than one for the category,
+                    // so distance can be carried by repeat rate the way the beacon carries it.
+                    // Still drawing on the same per-second budget as everything else.
+                    _budgetSpent += EnemyProximity.Tick(
+                        origin, settings, MaxPingsPerSecond - _budgetSpent);
                     continue;
                 }
 
@@ -185,7 +207,11 @@ namespace CultAccess.Audio
             {
                 if (_budgetSpent >= MaxPingsPerSecond) return;
 
-                var distance = Vector3.Distance(origin, position);
+                // Planar, matching the range test in SoundscapeSources.Consider that selected
+                // these sources. Measuring the two differently would let a source pass the
+                // radius check and then be scored silent by its own height.
+                var distance = Navigation.RoutePlanarMath.Distance(
+                    origin.x, origin.y, position.x, position.y);
                 var volume = SoundscapeFalloff.Volume(distance, settings.Radius, settings.Falloff);
                 if (!SoundscapeFalloff.Audible(volume)) continue;
 

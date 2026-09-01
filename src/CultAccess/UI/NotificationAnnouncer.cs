@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using CultAccess.Speech;
+using CultAccess.Status;
 using CultAccess.Util;
 using HarmonyLib;
 using TMPro;
@@ -32,6 +34,14 @@ namespace CultAccess.UI
 
         private static readonly AccessTools.FieldRef<NotificationBase, TextMeshProUGUI> DescriptionRef =
             AccessTools.FieldRefAccess<NotificationBase, TextMeshProUGUI>("_description");
+
+        /// <summary>
+        /// The faith card's numeric change, which the player sees as an arrow icon and a
+        /// coloured number in <c>_faithDeltaText</c> — a field outside <c>_description</c>,
+        /// which is why the reason was reaching the reader without the amount.
+        /// </summary>
+        private static readonly AccessTools.FieldRef<NotificationFaith, float> FaithDeltaRef =
+            AccessTools.FieldRefAccess<NotificationFaith, float>("_faithDelta");
         private static readonly Dictionary<NotificationItem, PendingItemChange> PendingItems =
             new Dictionary<NotificationItem, PendingItemChange>();
         private static readonly List<NotificationItem> DueItems = new List<NotificationItem>();
@@ -141,8 +151,67 @@ namespace CultAccess.UI
             if (text.IndexOf("This is a Notification", StringComparison.OrdinalIgnoreCase) >= 0) return;
             if (text.StartsWith("MISSING LOCALISATION", StringComparison.OrdinalIgnoreCase)) return;
 
+            // Measured 2026-08-25: the game's own descriptions already end in a full stop,
+            // and several end in an ellipsis, so appending produced "Your flock grows...."
+            // and "You gave a Sermon..". Trim before joining rather than after.
+            var faith = FaithChange(notification);
+            if (faith.Length > 0)
+                text = $"{RichText.TrimTrailingPunctuation(text)}. {faith}";
+
             Plugin.Log.LogInfo($"[notification] {notification.GetType().Name}: \"{text}\"");
             Speaker.Say(text, SpeechPriority.Queued);
+        }
+
+        /// <summary>
+        /// The amount of faith a card carries, and the level it leaves the cult at.
+        ///
+        /// The card's reason and its number live in two different fields, and only the reason
+        /// was being read — so "a follower has died" arrived without the ten points of faith
+        /// that went with it. One real-world event should produce one sentence naming both,
+        /// which is why this is folded into the existing announcement rather than spoken
+        /// separately.
+        ///
+        /// Empty for the many cards that carry no faith change at all: the game passes a delta
+        /// of zero for purely informational ones such as two followers starting a fight, and
+        /// hides the icon and number when it does.
+        /// </summary>
+        private static string FaithChange(NotificationBase notification)
+        {
+            if (!(notification is NotificationFaith card)) return string.Empty;
+
+            try
+            {
+                // NotificationFaith backs three templates. Only the faith one is reachable in
+                // this build — the sin and warmth entry points have no callers, and
+                // WarmthBar.ModifyWarmth is an empty method — but a card whose key says warmth
+                // would be a different bar, so it is named in the log and left alone rather
+                // than reported as faith.
+                var key = card.LocKey ?? string.Empty;
+                if (key.EndsWith("/Warmth", StringComparison.Ordinal))
+                {
+                    Plugin.Log.LogInfo($"[notification] warmth card, delta not spoken key={key}");
+                    return string.Empty;
+                }
+
+                // Mirrors NotificationFaith.Configure, which zeroes the displayed delta while
+                // the cult is brainwashed. Speaking the pre-lock number would report a change
+                // the player's own screen says did not happen.
+                if (FollowerBrainStats.BrainWashed)
+                    return Localization.Strings.Get("cult.faith_locked_no_change");
+
+                var delta = FaithDeltaRef(card);
+                if (Mathf.Approximately(delta, 0f)) return string.Empty;
+
+                var level = CultStatusText.Percent(CultFaithManager.CultFaithNormalised);
+                var amount = Mathf.Abs(delta).ToString("0.##", CultureInfo.InvariantCulture);
+                return Localization.Strings.Format(
+                    delta > 0f ? "cult.faith_rose" : "cult.faith_fell", amount, level);
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning($"Could not read a faith notification's delta: {e.Message}");
+                return string.Empty;
+            }
         }
 
         private static void AnnounceItem(InventoryItem.ITEM_TYPE type, int delta, int total)

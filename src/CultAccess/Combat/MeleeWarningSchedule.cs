@@ -35,6 +35,16 @@ namespace CultAccess.Combat
             internal float FireAt;
             internal float ImpactAt;
             internal string Family;
+
+            /// <summary>
+            /// Where the attack will land, when that is somewhere other than the attacker.
+            ///
+            /// A standing melee swing hits next to whoever threw it, so the attacker's own
+            /// position is the right thing to point at. A leap is not like that: the diving
+            /// maggot commits from one side of the room and lands on the other, and a cue
+            /// aimed at where it currently is sends the player toward the impact.
+            /// </summary>
+            internal Vector3? ImpactPosition;
         }
 
         private static readonly List<Pending> Waiting = new List<Pending>(8);
@@ -57,7 +67,8 @@ namespace CultAccess.Combat
         /// to wait in, which is honest: a warning that arrives late is still worth more than
         /// one that never comes.
         /// </summary>
-        internal static void Schedule(GameObject source, float impactIn, string family)
+        internal static void Schedule(
+            GameObject source, float impactIn, string family, Vector3? impactPosition = null)
         {
             var delay = Delay(impactIn, DodgeCover());
             var now = Time.unscaledTime;
@@ -68,13 +79,17 @@ namespace CultAccess.Combat
                 FireAt = now + delay,
                 ImpactAt = now + impactIn,
                 Family = family,
+                ImpactPosition = impactPosition,
             });
 
             CombatDiagnostics.Info(
                 $"[combat melee] scheduled family={family} impactIn={impactIn:0.000} " +
                 $"dodgeCover={DodgeCover():0.000} reaction={ReactionAllowance:0.000} " +
-                $"delay={delay:0.000}");
+                $"delay={delay:0.000} " +
+                $"impactAt={(impactPosition.HasValue ? Format(impactPosition.Value) : "attacker")}");
         }
+
+        private static string Format(Vector3 value) => $"({value.x:0.00},{value.y:0.00})";
 
         /// <summary>
         /// How long after the enemy commits the cue should sound.
@@ -113,7 +128,8 @@ namespace CultAccess.Combat
                 }
 
                 CombatAssist.SoundMeleeWarning(
-                    pending.Source, pending.ImpactAt - now, pending.Family);
+                    pending.Source, pending.ImpactAt - now, pending.Family,
+                    pending.ImpactPosition);
             }
         }
 

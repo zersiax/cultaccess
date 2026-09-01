@@ -168,6 +168,8 @@ namespace CultAccess.Audio
         {
             var rise = RisePerSecond * Time.unscaledDeltaTime;
             var fall = FallPerSecond * Time.unscaledDeltaTime;
+            var audible = 0;
+            var peak = 0f;
 
             for (var i = 0; i < Levels.Length; i++)
             {
@@ -184,7 +186,11 @@ namespace CultAccess.Audio
                 if (!Playing[i] && !Start(i)) continue;
 
                 Channels[i].setVolume(volume);
+                audible++;
+                if (volume > peak) peak = volume;
             }
+
+            CuePlayer.RecordSustained(CueId.AmbientWall, audible, peak);
         }
 
         private static bool Start(int index)

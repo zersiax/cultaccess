@@ -24,6 +24,26 @@ namespace CultAccess.Combat
 
         private static float _nextCueAt;
         private static bool _wasBlocked;
+
+        /// <summary>
+        /// When contact was last detected, and against what. Exposed because autowalk spent
+        /// three seconds pushing into a collider this class had already identified, in exactly
+        /// the direction it had already reported, and then said only "not making progress" —
+        /// a failure that could not say why while the answer sat one field away.
+        /// </summary>
+        private static float _blockedAt = float.NegativeInfinity;
+        private static string _blockedObstacle = string.Empty;
+        private static Vector2 _blockedDirection;
+
+        /// <summary>How stale a contact reading may be and still describe the present.</summary>
+        private const float BlockedMemorySeconds = 0.4f;
+
+        internal static bool Blocked =>
+            Time.unscaledTime - _blockedAt <= BlockedMemorySeconds;
+
+        internal static string BlockedObstacle => _blockedObstacle;
+
+        internal static Vector2 BlockedDirection => _blockedDirection;
         private static int _lastColliderId;
         private static Vector2 _lastDirection;
 
@@ -109,6 +129,13 @@ namespace CultAccess.Combat
                     Log("near", hit, warningDistance, direction);
                 }
                 _nextCueAt = now + Mathf.Lerp(FarRepeatSeconds, NearRepeatSeconds, closeness);
+            }
+
+            if (blocked)
+            {
+                _blockedAt = now;
+                _blockedObstacle = hit.collider == null ? string.Empty : hit.collider.name;
+                _blockedDirection = direction;
             }
 
             _wasBlocked = blocked;

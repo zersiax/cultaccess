@@ -173,9 +173,23 @@ namespace CultAccess.Audio
             }
         }
 
+        /// <summary>
+        /// Range is measured across the ground, not through the air.
+        ///
+        /// Z is height here, so a full 3D distance charges an airborne source for being in
+        /// the air: the diving miniboss reaches about 2.5 units of arc height, which against
+        /// a ten-unit enemy radius is a quarter of the range spent on altitude. The cue
+        /// dimmed and could drop below the audible floor part-way through a dive, for an
+        /// enemy that was directly overhead and about to land on the player.
+        ///
+        /// Planar also matches how every other distance the player hears is measured — the
+        /// spoken "4 metres" and the beacon's ping rate are both planar.
+        /// </summary>
         private static void Consider(Vector3 position, Vector3 origin, float radiusSquared)
         {
-            var squared = (position - origin).sqrMagnitude;
+            var dx = position.x - origin.x;
+            var dy = position.y - origin.y;
+            var squared = dx * dx + dy * dy;
             if (squared > radiusSquared) return;
 
             Scratch.Add(new Scored { Position = position, SquaredDistance = squared });

@@ -36,6 +36,7 @@ namespace CultAccess.Navigation
             AddFollowers(origin, radiusSquared, found);
             AddEnemies(origin, radiusSquared, found);
             AddLooseCharacters(origin, radiusSquared, player, found);
+            AddPickups(origin, radiusSquared, found);
 
             found.Sort((a, b) =>
                 (a.AimPosition - origin).sqrMagnitude.CompareTo((b.AimPosition - origin).sqrMagnitude));
@@ -64,6 +65,68 @@ namespace CultAccess.Navigation
                     Name = name,
                     Kind = PoiKind.Follower,
                 });
+            }
+        }
+
+        /// <summary>
+        /// Items lying on the ground.
+        ///
+        /// Reported 2026-08-26 and verified from the log: a dropped Flower Necklace played the
+        /// ambient item cue as the player approached — `AmbientItem=1@0.02` rising to `@0.33` —
+        /// and never appeared in the target list. The soundscape reads `PickUp.PickUps`, a
+        /// registry the whole of Navigation did not reference, so the mod was telling the
+        /// player something was there and offering no way to walk to it. That is the worst
+        /// shape an announcement can take.
+        ///
+        /// Hearts and loot chests arrive as `Interaction`s and are already listed by the
+        /// interaction scan; `AlreadyCovered` keeps a pickup that has both from appearing
+        /// twice.
+        /// </summary>
+        private static void AddPickups(
+            Vector3 origin, float radiusSquared, List<PointOfInterest> found)
+        {
+            var pickups = PickUp.PickUps;
+            if (pickups == null) return;
+
+            foreach (var pickup in pickups)
+            {
+                if (pickup == null || !pickup.gameObject.activeInHierarchy) continue;
+
+                var transform = pickup.transform;
+                if ((transform.position - origin).sqrMagnitude > radiusSquared) continue;
+                if (AlreadyCovered(transform, found)) continue;
+
+                found.Add(new PointOfInterest
+                {
+                    Transform = transform,
+                    Name = PickupName(pickup),
+                    Kind = PoiKind.Interactable,
+                });
+            }
+        }
+
+        /// <summary>
+        /// The item's own localised name and how many are in the pile, so a stack of five reads
+        /// as one entry worth walking to rather than as an anonymous "item".
+        /// </summary>
+        private static string PickupName(PickUp pickup)
+        {
+            try
+            {
+                var localized = InventoryItem.LocalizedName(pickup.type);
+                var name = RichText.IsUsableLocalization(localized, $"Inventory/{pickup.type}")
+                    ? RichText.Clean(localized)
+                    : RichText.Humanise(pickup.type.ToString());
+
+                if (name.Length == 0) name = "item";
+
+                var quantity = pickup.Quantity;
+                return quantity > 1 ? $"{name}, {quantity}" : name;
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Log.LogWarning($"Could not name a pickup: {e.Message}");
+                return "item";
             }
         }
 
@@ -104,7 +167,12 @@ namespace CultAccess.Navigation
                 typeName = typeName.Substring(5);
 
             var humanised = RichText.Humanise(typeName.Replace("(Clone)", string.Empty).Trim());
-            return humanised.Length == 0 ? "enemy" : humanised;
+            if (humanised.Length == 0) humanised = "enemy";
+
+            // Named here as well as in the radar, because the target list is the other place
+            // an enemy is chosen from and the two must not disagree about what a thing is.
+            var marker = Combat.EnemySpawners.Marker(health);
+            return marker == null ? humanised : $"{humanised}, {marker}";
         }
 
         /// <summary>

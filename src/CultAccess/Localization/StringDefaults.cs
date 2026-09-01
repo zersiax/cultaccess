@@ -238,6 +238,14 @@ namespace CultAccess.Localization
                 { "config.mode_beacon_and_speech", "beacon and speech" },
                 { "config.mode_beacon_only", "beacon only" },
                 { "config.mode_speech_only", "speech only" },
+                { "config.autowalk", "Autowalk" },
+                {
+                    "config.autowalk.detail",
+                    "Whether the autowalk key can walk you along the route guidance is " +
+                    "announcing. It never starts on its own and always needs the key pressed " +
+                    "for that journey, and your own movement keys take priority while held. " +
+                    "Turn this off if you would rather the mod could not move your character."
+                },
                 { "config.beacon_cues", "Beacon sound" },
                 { "config.beacon_cues.detail", "The beacon's own switch and volume." },
                 { "config.announce_interval", "Repeat guidance every" },
@@ -431,6 +439,180 @@ namespace CultAccess.Localization
                     "you went as you go, and this one says the dodge was worth it, after the fact. " +
                     "Hearing nothing after a dodge means nothing was going to hit you anyway."
                 },
+                // Cult-wide bars. All four read high-is-good, because that is how the game
+                // itself draws them: a full bar is a healthy cult in every case.
+                { "cult.faith", "Faith" },
+                { "cult.food", "Food" },
+                { "cult.cleanliness", "Cleanliness" },
+                { "cult.warmth", "Warmth" },
+                { "cult.bar", "{0} {1} percent" },
+                { "cult.bar_locked", "{0} locked at {1} percent" },
+                { "cult.follower", "{0} follower" },
+                { "cult.followers", "{0} followers" },
+                { "cult.population_with_dead", "{0}, {1} dead" },
+                { "cult.not_started", "The cult has no bars yet." },
+                { "cult.unavailable", "Cult status unavailable" },
+                { "cult.alert", "{0} low" },
+                { "cult.low", "{0} low, {1} percent." },
+                { "cult.low_with_consequence", "{0} low, {1} percent. {2}" },
+                { "cult.recovered", "{0} back up, {1} percent." },
+                { "cult.locked", "{0} is locked and cannot change." },
+                { "cult.unlocked", "{0} can change again." },
+                {
+                    "cult.consequence_faith",
+                    "Followers will start to dissent."
+                },
+                { "cult.consequence_food", "Followers will start to starve." },
+                { "cult.consequence_cleanliness", "Followers will start to fall ill." },
+                { "cult.faith_rose", "Faith up {0}, now {1} percent" },
+                { "cult.faith_fell", "Faith down {0}, now {1} percent" },
+                { "cult.faith_locked_no_change", "Faith is locked, so nothing changed" },
+
+                // One follower: the tiles on every picker, and the follower key.
+                { "follower.unknown", "Follower details unavailable" },
+                { "follower.none", "No follower nearby" },
+                { "follower.dead", "dead" },
+                { "follower.level", "level {0}" },
+                { "follower.loyalty", "loyalty {0} percent" },
+                { "follower.food", "food {0} percent" },
+                { "follower.health", "health {0} percent" },
+                { "follower.pleasure", "pleasure {0} percent" },
+                { "follower.unavailable", "unavailable, {0}" },
+                { "follower.unavailable_plain", "unavailable" },
+                { "follower.needs", "needs {0}" },
+                { "follower.doing", "doing {0}" },
+                { "follower.trait", "{0} trait" },
+                { "follower.traits", "{0} traits" },
+                { "follower.disciple", "disciple" },
+                { "follower.married_to_you", "married to you" },
+                { "follower.spouse", "married to {0}" },
+                { "follower.age", "age {0}" },
+                { "follower.member_new", "new to the cult" },
+                { "follower.member_day", "in the cult {0} day" },
+                { "follower.member_days", "in the cult {0} days" },
+                { "follower.cult_trait", "cult trait" },
+                { "follower.thought_up", "faith up" },
+                { "follower.thought_up_lot", "faith up a lot" },
+                { "follower.thought_down", "faith down" },
+                { "follower.thought_down_lot", "faith down a lot" },
+
+                { "config.cult_status", "Announce cult bar warnings" },
+                {
+                    "config.cult_status.detail",
+                    "Say when the cult's faith, food, cleanliness or warmth drops below a " +
+                    "quarter full, and when it climbs back. This is not cosmetic. Below that " +
+                    "line the game picks a follower at random and turns them into a dissenter, " +
+                    "or makes them starve, or makes them ill, and it warns sighted players by " +
+                    "making the bar pulse. It also says when a ritual freezes a bar so it " +
+                    "cannot change."
+                },
+                { "config.cult_in_where_am_i", "Cult warning in where am I" },
+                {
+                    "config.cult_in_where_am_i.detail",
+                    "Add a short reminder of which cult bars are low to the where-am-I key. It " +
+                    "adds nothing at all while every bar is healthy, so it usually costs no " +
+                    "words. Turn it off to keep that key to your own health and fervour; the " +
+                    "cult status key still reads all four bars in full."
+                },
+
+                // How a follower is identified in a list: the name first, then the form and
+                // level that tell two of them apart across a base.
+                { "follower.identity_species_level", "{0} the level {1} {2}" },
+                { "follower.identity_species", "{0} the {1}" },
+                { "follower.identity_level", "{0}, level {1}" },
+
+                // The one thing worth walking over for. Where the game already has a word for
+                // it these are only the fallback, used when the term is untranslated.
+                { "follower.headline_catch", "leaving the cult, catch them" },
+                { "follower.headline_sin", "sin to absolve" },
+                { "follower.headline_quest", "quest to complete" },
+                { "follower.headline_reward", "reward to collect" },
+                { "follower.headline_attention", "wants you" },
+
+                // A follower who has walked over to ask for something. The game types each of
+                // these on the task and then shows one generic bubble for all of them.
+                { "follower.complaint_hunger", "is hungry" },
+                { "follower.complaint_homeless", "has nowhere to live" },
+                { "follower.complaint_sick", "is ill" },
+                { "follower.complaint_level_up", "is ready to level up" },
+                { "follower.complaint_better_house", "wants a better house" },
+                { "follower.complaint_first_meeting", "wants to introduce themselves" },
+                { "follower.complaint_grateful", "is grateful" },
+                { "follower.complaint_give_quest", "has a quest for you" },
+                { "follower.complaint_completed_quest", "has finished a quest" },
+                { "follower.complaint_failed_quest", "failed a quest" },
+                { "follower.complaint_onboarding", "has something to show you" },
+                { "follower.complaint_twitch", "has a message from Twitch chat" },
+                { "follower.complaint_speak", "wants to talk" },
+
+                // The speech-bubble icons, which carry no text of their own.
+                { "follower.bubble_food", "wants food" },
+                { "follower.bubble_home", "wants a home" },
+                { "follower.bubble_help", "wants your attention" },
+                { "follower.bubble_starving", "is starving" },
+                { "follower.bubble_ill", "is ill" },
+                { "follower.bubble_sin", "has sin to absolve" },
+                { "follower.bubble_ready", "is ready" },
+                { "follower.bubble_twitch", "has a message from Twitch chat" },
+                { "follower.bubble_dissent", "is spreading dissent" },
+                { "follower.bubble_dissent_argue", "is arguing about dissent" },
+                { "follower.bubble_meat", "is upset about the meat you served" },
+                { "follower.request", "{0} {1}." },
+                { "follower.request_located", "{0} {1}. {2}, {3}." },
+
+                { "config.follower_requests", "Announce follower requests" },
+                {
+                    "config.follower_requests.detail",
+                    "Say what a follower wants when they put a speech bubble over their head. " +
+                    "That bubble is an icon and a sound with no text in it, so the sound " +
+                    "already reaches you and its meaning does not. A follower who has crossed " +
+                    "the base to find you is named along with the reason the game recorded, " +
+                    "which is more than the bubble itself shows. Only followers inside the " +
+                    "scan radius are reported, and each repeats at most once every 45 seconds " +
+                    "however long they keep asking."
+                },
+
+                // The two cult pages: the Cult tab of the player menu, and the Cult page
+                // behind the Doctrine menu. Each number is a bare digit on screen with only a
+                // picture beside it, so each has to be named.
+                { "cult.named", "{0}." },
+                { "cult.home", "{0} home" },
+                { "cult.homes", "{0} homes" },
+                { "cult.stat_total_followers", "{0} followers ever" },
+                { "cult.stat_murders", "{0} murdered" },
+                { "cult.stat_starved", "{0} starved to death" },
+                { "cult.stat_sacrifices", "{0} sacrificed" },
+                { "cult.stat_natural_deaths", "{0} died naturally" },
+                { "cult.stat_crusades", "{0} crusades" },
+                { "cult.stat_player_deaths", "you have died {0} times" },
+                { "cult.stat_kills", "{0} enemies killed" },
+                { "cult.stat_winters", "{0} winters survived" },
+
+                { "config.log_follower_wheel", "Log follower command wheels" },
+                {
+                    "config.log_follower_wheel.detail",
+                    "Record what state a follower was in when their command wheel opened, which " +
+                    "commands it offered, and which doctrines are unlocked. The game builds a " +
+                    "different wheel for a sleeping, drunk, dissenting or zombie follower, so a " +
+                    "command you cannot find may be locked or may simply be on another wheel, " +
+                    "and the two look identical from the outside. Nothing is spoken."
+                },
+
+                { "cult.faith_history_up", "faith up {0}" },
+                { "cult.faith_history_down", "faith down {0}" },
+
+                { "autowalk.no_progress", "Autowalk stopped. Not making progress." },
+                {
+                    "autowalk.blocked",
+                    "Autowalk stopped. Scenery to the {0} is in the way; step around it."
+                },
+                {
+                    "autowalk.blocked_plain",
+                    "Autowalk stopped. Scenery is in the way; step around it."
+                },
+
+                { "route.blocked", "Blocked that way." },
+
                 { "config.wall_notes", "Wall notes" },
                 {
                     "config.wall_notes.detail",

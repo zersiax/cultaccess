@@ -57,6 +57,141 @@ namespace CultAccess.Diagnostics
             }
         }
 
+        /// <summary>
+        /// Dump what the connected controller physically exposes, what the game binds on it,
+        /// and therefore what is left.
+        ///
+        /// The outstanding half of the input gate. Until now only the keyboard was probed, so
+        /// every controller statement in the docs was reasoning rather than evidence — and the
+        /// keyboard-only dump is exactly why a session played entirely on a pad produced no
+        /// usable input data at all.
+        ///
+        /// Two things make this harder than the keyboard case and are worth stating rather
+        /// than rediscovering. Rewired only instantiates joystick maps for a controller that
+        /// is actually connected, so this is silent and says so if the pad is absent, rather
+        /// than reporting an empty set as "nothing is bound". And bindings are per map
+        /// category: an element free during gameplay may well be taken in menus, so the free
+        /// set is reported per category as well as overall. Only the overall set is safe for
+        /// a global hotkey; a per-category gap is usable only by something that knows which
+        /// context it is in.
+        /// </summary>
+        public static void LogControllerBindings()
+        {
+            try
+            {
+                if (!ReInput.isReady)
+                {
+                    Plugin.Log.LogInfo("[controller probe] Rewired not ready; skipped.");
+                    return;
+                }
+
+                var joysticks = ReInput.controllers.Joysticks;
+                if (joysticks == null || joysticks.Count == 0)
+                {
+                    Plugin.Log.LogInfo(
+                        "[controller probe] no joystick connected; nothing to probe. Rewired " +
+                        "only builds joystick maps for a controller that is present, so this " +
+                        "is an absent pad rather than an unbound one. Connect it and restart.");
+                    return;
+                }
+
+                foreach (var joystick in joysticks)
+                {
+                    if (joystick == null) continue;
+                    LogOneJoystick(joystick);
+                }
+            }
+            catch (System.Exception e)
+            {
+                Plugin.Log.LogWarning($"[controller probe] failed: {e}");
+            }
+        }
+
+        private static void LogOneJoystick(Joystick joystick)
+        {
+            var elements = joystick.ElementIdentifiers;
+            var report = new StringBuilder();
+            report.AppendLine(
+                $"[controller probe] joystick=\"{joystick.name}\" " +
+                $"hardware=\"{joystick.hardwareName}\" elements={elements?.Count ?? 0}");
+
+            if (elements == null || elements.Count == 0)
+            {
+                Plugin.Log.LogInfo(report.ToString());
+                return;
+            }
+
+            // Element id to a readable "name (Type)", so the free list below names things the
+            // way a player would say them rather than by Rewired's numbering.
+            var known = new SortedDictionary<int, string>();
+            foreach (var element in elements)
+                known[element.id] = $"{element.name} ({element.elementType})";
+
+            // categoryName -> set of element ids bound in it.
+            var boundByCategory = new SortedDictionary<string, SortedSet<int>>();
+            var boundAnywhere = new SortedSet<int>();
+
+            foreach (var player in ReInput.players.AllPlayers)
+            {
+                foreach (var map in player.controllers.maps.GetAllMaps(ControllerType.Joystick))
+                {
+                    if (map == null) continue;
+
+                    var category = ReInput.mapping.GetMapCategory(map.categoryId);
+                    var categoryName =
+                        category?.descriptiveName ?? category?.name ?? $"category {map.categoryId}";
+
+                    if (!boundByCategory.TryGetValue(categoryName, out var inCategory))
+                    {
+                        inCategory = new SortedSet<int>();
+                        boundByCategory[categoryName] = inCategory;
+                    }
+
+                    foreach (var binding in map.AllMaps)
+                    {
+                        if (binding == null) continue;
+
+                        inCategory.Add(binding.elementIdentifierId);
+                        boundAnywhere.Add(binding.elementIdentifierId);
+
+                        var action = ReInput.mapping.GetAction(binding.actionId);
+                        var actionName =
+                            action?.descriptiveName ?? action?.name ?? $"action {binding.actionId}";
+
+                        report.AppendLine(
+                            $"  bound category=\"{categoryName}\" " +
+                            $"element=\"{binding.elementIdentifierName}\" " +
+                            $"id={binding.elementIdentifierId} type={binding.elementType} " +
+                            $"pole={binding.axisContribution} action=\"{actionName}\" " +
+                            $"actionId={binding.actionId}");
+                    }
+                }
+            }
+
+            foreach (var pair in boundByCategory)
+                report.AppendLine(
+                    $"  FREE in \"{pair.Key}\" ({known.Count - pair.Value.Count}): " +
+                    Join(known, pair.Value));
+
+            // The only line that answers "what can a global mod hotkey use?". Anything here is
+            // untouched by every category the game has loaded.
+            report.AppendLine(
+                $"  FREE EVERYWHERE ({known.Count - boundAnywhere.Count}): " +
+                Join(known, boundAnywhere));
+
+            Plugin.Log.LogInfo(report.ToString());
+        }
+
+        private static string Join(
+            SortedDictionary<int, string> known, SortedSet<int> excluded)
+        {
+            var free = new List<string>();
+            foreach (var pair in known)
+                if (!excluded.Contains(pair.Key)) free.Add(pair.Value);
+
+            return free.Count == 0 ? "none" : string.Join(", ", free.ToArray());
+        }
+
         public static void LogKeyboardBindings()
         {
             try

@@ -38,6 +38,41 @@ namespace CultAccess.Audio
         private static bool _loggedMissingCamera;
 
         /// <summary>
+        /// A once-a-second census of what actually sounded.
+        ///
+        /// The first-play line below was the only record a cue ever left, so a session log
+        /// could say a cue existed and never whether it played again. That cost a diagnosis
+        /// directly: asked whether the enemy proximity cue was audible in the room where a
+        /// run ended, the log could not answer, because `AmbientEnemy` had logged once near
+        /// startup and nothing since.
+        ///
+        /// Per-play logging is not the fix — wall tones alone run four directions every
+        /// 0.15 s. A per-second tally of count and peak volume answers "did it fire, and how
+        /// loudly" at a few lines a second, and makes masking arguments arithmetic rather
+        /// than recollection.
+        /// </summary>
+        private struct Tally
+        {
+            internal int Count;
+            internal float PeakVolume;
+
+            /// <summary>
+            /// Most channels of this cue audible at once during the window, for cues that
+            /// sustain rather than fire. A count is the wrong measure for those: the wall ring
+            /// holds tones open continuously, so "how many played" is meaningless and "how many
+            /// were sounding together, how loud" is the thing that decides whether the mix has
+            /// room for anything else.
+            /// </summary>
+            internal int Concurrent;
+        }
+
+        private static readonly Dictionary<CueId, Tally> Census = new Dictionary<CueId, Tally>();
+        private static float _censusWindowEndsAt;
+
+        /// <summary>Log-only, and on by default until the audio layer is confirmed.</summary>
+        internal static bool LogCensus = true;
+
+        /// <summary>
         /// When the last life-threatening cue played, so lower-priority cues can stand aside
         /// rather than mask it.
         /// </summary>
@@ -93,6 +128,7 @@ namespace CultAccess.Audio
                         $"[cue audio] first={cue} pan={pan:0.00} pitch={pitch:0.00} " +
                         $"volume={volume:0.00}");
 
+                Record(cue, volume);
                 return true;
             }
             catch (Exception e)
@@ -101,6 +137,64 @@ namespace CultAccess.Audio
                 Plugin.Log.LogError($"Cue {cue} playback failed; disabling it: {e}");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Report a sustained cue's concurrency into the same census window.
+        ///
+        /// Needed because <see cref="WallSonar"/> owns its own FMOD channels and never passes
+        /// through <see cref="Play"/>, so the densest thing in the mix — four continuous tones
+        /// at a 0.15 s cadence — was invisible to the one diagnostic meant to answer whether
+        /// the mix is too busy.
+        /// </summary>
+        internal static void RecordSustained(CueId cue, int concurrent, float peak)
+        {
+            if (!LogCensus) return;
+
+            Census.TryGetValue(cue, out var tally);
+            if (concurrent > tally.Concurrent) tally.Concurrent = concurrent;
+            if (peak > tally.PeakVolume) tally.PeakVolume = peak;
+            Census[cue] = tally;
+        }
+
+        private static void Record(CueId cue, float volume)
+        {
+            if (!LogCensus) return;
+
+            Census.TryGetValue(cue, out var tally);
+            tally.Count++;
+            if (volume > tally.PeakVolume) tally.PeakVolume = volume;
+            Census[cue] = tally;
+        }
+
+        /// <summary>
+        /// Emit and reset the census window. Driven from the plugin's Update rather than from
+        /// the soundscape's, because the event cues that matter most — melee, projectile,
+        /// trap — do not go through the ambient layer at all and would otherwise go unreported
+        /// in exactly the sessions where the ambient categories were switched off.
+        /// </summary>
+        internal static void TickCensus()
+        {
+            if (!LogCensus) return;
+            if (Time.unscaledTime < _censusWindowEndsAt) return;
+
+            // Re-armed before anything can return early, so a quiet second cannot leave the
+            // window unset and turn this into a per-frame log.
+            _censusWindowEndsAt = Time.unscaledTime + 1f;
+            if (Census.Count == 0) return;
+
+            var line = new System.Text.StringBuilder("[cue audio] census");
+            foreach (var pair in Census)
+            {
+                // "3x" is three sounding together; a bare number is three that fired.
+                var amount = pair.Value.Concurrent > 0
+                    ? $"{pair.Value.Concurrent}x"
+                    : pair.Value.Count.ToString();
+                line.Append($" {pair.Key}={amount}@{pair.Value.PeakVolume:0.00}");
+            }
+
+            Plugin.Log.LogInfo(line.ToString());
+            Census.Clear();
         }
 
         /// <summary>
@@ -124,6 +218,23 @@ namespace CultAccess.Audio
                 }
                 return false;
             }
+
+            // Flatten the target onto the listener's depth before projecting. Z in this game
+            // is height, not ground position, and the help text promises that pitch means
+            // "north and south across the ground, not height" — so a source with its own Z
+            // was breaking the cue layer's own documented contract.
+            //
+            // It is not a small effect. EnemyMaggotMiniBoss.DiveMoveRoutine arcs its whole
+            // transform through midpoint + Vector3.back * 5, putting it about 2.5 units off
+            // the floor at the apex, which swings the projected screen point up and across
+            // while the shadow, the game's own jump and land sounds, and the damage collider
+            // all stay on the ground. Three positions for one enemy, only one of them ours.
+            //
+            // This is the same defect RouteFollower.CurrentWaypoint already fixes for
+            // navigation waypoints, where camera projection otherwise turned a northward
+            // step into a southward bearing. The fix went into navigation and never into
+            // the cue layer.
+            target.z = listener.position.z;
 
             var from = camera.WorldToScreenPoint(listener.position);
             var to = camera.WorldToScreenPoint(target);
@@ -149,6 +260,7 @@ namespace CultAccess.Audio
             SoundBank.Shutdown();
             Failed.Clear();
             Logged.Clear();
+            Census.Clear();
             LastCriticalAt = float.NegativeInfinity;
         }
 

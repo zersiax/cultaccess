@@ -64,6 +64,11 @@ namespace CultAccess.UI
                 $"[follower wheel] event=open follower='{Safe(FollowerName(follower))}' " +
                 $"choices={commands?.Count ?? 0} cancellable={cancellable}");
 
+            // Log-only, and separate from the line above because it answers a different
+            // question: which group the game chose for this follower's state, and therefore
+            // whether a command that is not here is missing or merely elsewhere.
+            Diagnostics.FollowerWheelDiagnostics.LogWheelOpened(follower, commands);
+
             if (!Plugin.SpeechEnabled.Value) return;
 
             var owner = FollowerName(follower);
