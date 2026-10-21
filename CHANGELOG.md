@@ -11,6 +11,32 @@ Game version tested against throughout: **Cult of the Lamb 1.5.25.1049** (Steam)
 
 ---
 
+## [0.2.3] — 2026-10-21
+
+### Fixed
+
+- Autowalk now supports the opening sacrifice scene's `PlayerPrisonerController`, using
+  its own idle/moving states and yielding to its scripted movement and kneeling animation.
+  Manual input is read through the same gameplay getters as the active controller.
+- A disconnected or blocked route no longer enables autowalk or interrupts its refusal
+  with "Autowalk on." Retrying an existing blocked target repeats the route explanation;
+  losing a route while walking disengages without interrupting navigation's explanation.
+  Successful startup queues its confirmation after the destination announcement.
+- Movement injection is cleared before each frame's checks. Manual steering, pause,
+  scripted movement and combat states immediately regain their axes, and autowalk never
+  reads its own previous heading as manual input.
+
+### Tests
+
+- Added a regression harness that executes the production autowalk implementation and
+  input postfixes with game-boundary doubles. It covers the reported disconnected exit,
+  intro movement, announcement ordering, manual takeover, route recovery, missing input,
+  co-op isolation, movement inversion and stale frames. The build runs it before compiling.
+- Automated in-game validation on **Cult of the Lamb 1.5.26.1058** (Steam): the disconnected
+  east exit preserves its refusal, the prisoner physically walks the real route to the
+  kneel altar, arrival stops autowalk, and the altar starts its scripted conversation.
+  Speech calls were captured at the NVDA provider boundary; this was not an auditory test.
+
 ## [0.2.2] — 2026-08-28
 
 A followers and cult-stats pass, plus two sessions of listening folded back in.

@@ -380,6 +380,8 @@ cult.faith_history_up = faith up {0}
 cult.faith_history_down = faith down {0}
 
 # Autowalk giving up. {0} is a compass direction such as "north east".
+autowalk.controller_unavailable = Autowalk is unavailable here. Use the movement controls to walk.
+autowalk.input_unavailable = Autowalk stopped. The game's movement controls are unavailable.
 autowalk.no_progress = Autowalk stopped. Not making progress.
 autowalk.blocked = Autowalk stopped. Scenery to the {0} is in the way; step around it.
 autowalk.blocked_plain = Autowalk stopped. Scenery is in the way; step around it.

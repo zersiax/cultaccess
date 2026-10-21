@@ -29,15 +29,6 @@ namespace CultAccess.Navigation
     internal static class Autowalk
     {
         /// <summary>
-        /// Rewired action ids for the gameplay movement axes, as
-        /// <c>RewiredGameplayInputSource.GetHorizontalAxis</c> and its vertical counterpart
-        /// read them. Read raw here, before the accessibility invert those two apply, because
-        /// all this needs to know is whether the player is pushing anything.
-        /// </summary>
-        private const int HorizontalAxisAction = 1;
-        private const int VerticalAxisAction = 0;
-
-        /// <summary>
         /// Below this the heading is noise. Standing on the waypoint produces a direction
         /// that flips every frame, which reads as a stutter rather than as arrival.
         /// </summary>
@@ -106,6 +97,31 @@ namespace CultAccess.Navigation
             var target = Navigator.TrackedTarget;
             if (target == null) return;
 
+            // A pending target is tracked so navigation can retry it, but no walking route
+            // exists. Preserve TrackSelected's refusal instead of interrupting it with a
+            // success message. A second attempt should repeat the current explanation.
+            if (Navigator.WaitingForRoute && !startedGuidance)
+            {
+                Navigator.AnnounceGuidance();
+                target = Navigator.TrackedTarget;
+                if (target == null) return;
+            }
+            if (Navigator.WaitingForRoute)
+            {
+                Plugin.Log.LogInfo($"[autowalk] refused target=\"{target.Name}\" reason=no-route");
+                return;
+            }
+
+            var player = NavigatorPlayer.Resolve();
+            if (player == null ||
+                (player.GetComponent<PlayerFarming>() == null &&
+                 player.GetComponent<PlayerPrisonerController>() == null))
+            {
+                Plugin.Log.LogWarning("[autowalk] refused reason=no-movement-controller");
+                Speaker.Say(Localization.Strings.Get("autowalk.controller_unavailable"));
+                return;
+            }
+
             _engaged = true;
             _drivingFrame = NotDriving;
             ResetProgress();
@@ -116,7 +132,9 @@ namespace CultAccess.Navigation
             // "Guiding to Shrine" has just been spoken if we started it, and naming the
             // target twice in one breath is the sort of repetition that makes a screen reader
             // tiring to listen to.
-            Speaker.Say(startedGuidance ? "Autowalk on." : $"Autowalk on. Walking to {target.Name}.");
+            Speaker.Say(
+                startedGuidance ? "Autowalk on." : $"Autowalk on. Walking to {target.Name}.",
+                startedGuidance ? SpeechPriority.Queued : SpeechPriority.Now);
         }
 
         /// <summary>
@@ -147,6 +165,13 @@ namespace CultAccess.Navigation
         {
             if (!_engaged) return;
 
+            // Clear last frame's injection before any early return and before reading the
+            // game's axes. Otherwise it can override manual input for another frame, or be
+            // read back as though the player were steering.
+            _drivingFrame = NotDriving;
+            _horizontal = 0f;
+            _vertical = 0f;
+
             var target = Navigator.TrackedTarget;
             if (target == null)
             {
@@ -154,24 +179,31 @@ namespace CultAccess.Navigation
                 return;
             }
 
+            if (Navigator.WaitingForRoute)
+            {
+                // Navigation has already announced why the route disappeared.
+                Disengage("route unavailable");
+                return;
+            }
+
             var player = NavigatorPlayer.Resolve();
-            var farming = PlayerFarming.Instance;
-            if (player == null || farming == null) return;
+            if (player == null) return;
 
             var position = player.position;
 
             // Everything from here down that stops short of driving re-anchors the progress
             // measurement, so standing still legitimately — paused, mid-animation, or because
             // the player is steering — can never be mistaken for being stuck.
-            if (!CanDrive(farming))
+            if (!CanDrive(player))
             {
                 ResetProgress(position);
                 return;
             }
 
-            if (!TryReadManualInput(farming, out var manualX, out var manualY))
+            if (!TryReadManualInput(player, out var manualX, out var manualY))
             {
-                ResetProgress(position);
+                Disengage("movement input unavailable",
+                    Localization.Strings.Get("autowalk.input_unavailable"));
                 return;
             }
 
@@ -267,11 +299,26 @@ namespace CultAccess.Navigation
         /// fishing reel and the dodge-roll steer, and a heading substituted into any of those
         /// would be a different feature than the one that was asked for.
         /// </summary>
-        private static bool CanDrive(PlayerFarming farming)
+        private static bool CanDrive(Transform player)
         {
+            if (Time.timeScale == 0f) return false;
+
+            // The opening sacrifice scene uses a different controller and only two walking
+            // states. Its scripted walk and kneeling animation must keep their own input.
+            var prisoner = player.GetComponent<PlayerPrisonerController>();
+            if (prisoner != null && prisoner.isActiveAndEnabled)
+            {
+                var state = player.GetComponent<StateMachine>();
+                return !prisoner.GoToAndStopping && state != null &&
+                       (state.CURRENT_STATE == StateMachine.State.Idle ||
+                        state.CURRENT_STATE == StateMachine.State.Moving);
+            }
+
+            var farming = player.GetComponent<PlayerFarming>();
+            if (farming == null || !farming.isActiveAndEnabled) return false;
+
             // The game's own authority for "a script is moving the Lamb, input is not".
             if (farming.GoToAndStopping || farming.state == null) return false;
-            if (Time.timeScale == 0f) return false;
 
             switch (farming.state.CURRENT_STATE)
             {
@@ -288,24 +335,24 @@ namespace CultAccess.Navigation
         }
 
         private static bool TryReadManualInput(
-            PlayerFarming farming, out float horizontal, out float vertical)
+            Transform player, out float horizontal, out float vertical)
         {
             horizontal = 0f;
             vertical = 0f;
 
-            var rewired = farming.rewiredPlayer;
-            if (rewired == null)
+            var farming = player.GetComponent<PlayerFarming>();
+            var gameplay = InputManager.Gameplay;
+            if (gameplay == null || (farming != null && farming.rewiredPlayer == null))
             {
-                // Refusing to drive is the only safe answer: without the player's own axes
-                // there is no way to notice them taking over, and a movement key we cannot
-                // release on demand is worse than a feature that did not start.
-                Plugin.Log.LogWarning(
-                    "[autowalk] no Rewired player on PlayerFarming; not driving this frame.");
+                Plugin.Log.LogWarning("[autowalk] movement input unavailable; not driving");
                 return false;
             }
 
-            horizontal = rewired.GetAxis(HorizontalAxisAction);
-            vertical = rewired.GetAxis(VerticalAxisAction);
+            // Use the same getters as each controller. With no PlayerFarming argument the
+            // game reads all intro players' axes, including the keyboard and controller.
+            // Tick cleared Driving first, so our postfix cannot replace these manual values.
+            horizontal = gameplay.GetHorizontalAxis(farming);
+            vertical = gameplay.GetVerticalAxis(farming);
             return true;
         }
 

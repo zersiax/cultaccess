@@ -601,6 +601,8 @@ namespace CultAccess.Localization
                 { "cult.faith_history_up", "faith up {0}" },
                 { "cult.faith_history_down", "faith down {0}" },
 
+                { "autowalk.controller_unavailable", "Autowalk is unavailable here. Use the movement controls to walk." },
+                { "autowalk.input_unavailable", "Autowalk stopped. The game's movement controls are unavailable." },
                 { "autowalk.no_progress", "Autowalk stopped. Not making progress." },
                 {
                     "autowalk.blocked",

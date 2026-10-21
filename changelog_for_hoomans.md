@@ -2,6 +2,14 @@
 
 What is this world coming to that we split these up. Anyway:
 
+## 0.2.3
+
+* Autowalk now works during the opening walk to be sacrificed.
+* If the pathfinder cannot reach something, its explanation is no longer cut off by
+  "Autowalk on." Autowalk stays off until there is a route.
+* Taking the stick, pausing, or entering an animation releases autowalk's movement
+  immediately.
+
 ## 0.2.2
 
 ### Your cult, and your followers. Two new keys.

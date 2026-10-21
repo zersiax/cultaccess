@@ -28,6 +28,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $root 'src\CultAccess\CultAccess.csproj'
 $tests = Join-Path $root 'tests\CultAccess.PureTests\CultAccess.PureTests.csproj'
+$navigationTests = Join-Path $root 'tests\CultAccess.NavigationTests\CultAccess.NavigationTests.csproj'
 
 if (-not $SkipTests) {
     Write-Host 'Running pure tests...'
@@ -37,6 +38,14 @@ if (-not $SkipTests) {
         exit 1
     }
     Write-Host 'Pure tests passed.'
+
+    Write-Host 'Running navigation regression tests...'
+    dotnet run --project $navigationTests -c Release --verbosity quiet
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host 'Navigation regression tests FAILED. Stopping before build.'
+        exit 1
+    }
+    Write-Host 'Navigation regression tests passed.'
 }
 
 $buildArgs = @('build', $project, '-c', 'Release', '-p:DeployOnBuild=false', '--verbosity', 'quiet')

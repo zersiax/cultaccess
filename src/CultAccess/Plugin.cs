@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace CultAccess
 {
-    [BepInPlugin(Guid, "CultAccess", "0.2.2")]
+    [BepInPlugin(Guid, "CultAccess", "0.2.3")]
     public class Plugin : BaseUnityPlugin
     {
         public const string Guid = "dev.cultaccess";
